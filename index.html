@@ -534,6 +534,10 @@
   <script>
     "use strict";
 
+    const configuredApi = window.SECURITY_SCANNER_API_BASE || new URLSearchParams(window.location.search).get("api") || "";
+    const API_BASE = configuredApi.replace(/\/$/, "");
+    const apiUrl = (path) => API_BASE + path;
+
     const state = {
       scans: 0,
       findings: 0,
@@ -936,7 +940,7 @@
 
     async function checkBackendHealth() {
       try {
-        const response = await fetch("/api/v1/health", { cache: "no-store" });
+        const response = await fetch(apiUrl("/api/v1/health"), { cache: "no-store" });
         if (!response.ok) throw new Error("Backend ตอบกลับ HTTP " + response.status);
         const health = await response.json();
         const services = health.services || {};
@@ -1039,7 +1043,7 @@
       while (!job.finalized && transientErrors < 5) {
         await delay(1800);
         try {
-          const response = await fetch("/api/v1/virus-scans/" + encodeURIComponent(job.id), {
+          const response = await fetch(apiUrl("/api/v1/virus-scans/" + encodeURIComponent(job.id)), {
             headers: { "X-Scan-Token": job.token },
             cache: "no-store"
           });
@@ -1145,7 +1149,7 @@
       button.disabled = true;
       button.textContent = "????????????...";
       try {
-        const response = await fetch("/api/v1/website-headers", {
+        const response = await fetch(apiUrl("/api/v1/website-headers"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url: target }),
@@ -1371,7 +1375,7 @@
             uploadForm.append("file", file, file.name);
             uploadForm.append("mode", mode);
             uploadForm.append("consent", "true");
-            const response = await fetch("/api/v1/virus-scans", {
+            const response = await fetch(apiUrl("/api/v1/virus-scans"), {
               method: "POST",
               body: uploadForm,
               cache: "no-store"
