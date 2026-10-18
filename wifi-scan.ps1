@@ -3,68 +3,59 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$netsh = Join-Path $env:SystemRoot "System32\netsh.exe"
+$lines = @(& $netsh wlan show networks mode=bssid 2>&1 | ForEach-Object { [string]$_ })
+if ($LASTEXITCODE -ne 0) {
+    throw "Windows could not scan nearby Wi-Fi networks. Check that the WLAN service and adapter are enabled."
+}
 
-function Get-NetshValue {
-    param([string[]]$Lines, [string]$Label)
-    foreach ($line in $Lines) {
-        if ($line -match "^\s*$([regex]::Escape($Label))\s*:\s*(.+?)\s*$") {
-            return $Matches[1].Trim()
+$networks = [System.Collections.Generic.List[object]]::new()
+$current = $null
+foreach ($line in $lines) {
+    if ($line -match '^\s*SSID\s+\d+\s*:\s*(.*)$') {
+        $current = [ordered]@{
+            ssid = $Matches[1].Trim()
+            authentication = "UNKNOWN"
+            cipher = "UNKNOWN"
+            signalQualityPercent = 0
+            bssidCount = 0
+        }
+        $networks.Add([pscustomobject]$current)
+        continue
+    }
+    if ($null -eq $current) { continue }
+    if ($line -match '^\s*Authentication\s*:\s*(.*?)\s*$') {
+        $current.authentication = $Matches[1].Trim()
+    } elseif ($line -match '^\s*Encryption\s*:\s*(.*?)\s*$') {
+        $current.cipher = $Matches[1].Trim()
+    } elseif ($line -match '^\s*BSSID\s+\d+\s*:') {
+        $current.bssidCount++
+    } elseif ($line -match '^\s*Signal\s*:\s*(\d{1,3})%') {
+        $quality = [Math]::Max(0, [Math]::Min(100, [int]$Matches[1]))
+        if ($quality -gt $current.signalQualityPercent) {
+            $current.signalQualityPercent = $quality
         }
     }
-    return $null
 }
 
-function Get-SignalPercent {
-    param([string]$Value)
-    if ($Value -match "(\d{1,3})") {
-        return [Math]::Max(0, [Math]::Min(100, [int]$Matches[1]))
-    }
-    return 0
+foreach ($network in $networks) {
+    $authentication = $network.authentication.ToUpperInvariant()
+    $cipher = $network.cipher.ToUpperInvariant()
+    $network | Add-Member -NotePropertyName securityEnabled -NotePropertyValue ([bool]($authentication -notmatch 'OPEN|NONE' -and $cipher -ne 'NONE'))
 }
 
-$lines = @(netsh wlan show interfaces 2>&1 | ForEach-Object { [string]$_ })
-if ($LASTEXITCODE -ne 0) {
-    throw "Wi-Fi command failed"
-}
-
-$state = Get-NetshValue -Lines $lines -Label "State"
-if (-not $state -or $state -notmatch "connected") {
-    throw "No connected Wi-Fi network was found"
-}
-
-$ssid = Get-NetshValue -Lines $lines -Label "SSID"
-$authentication = Get-NetshValue -Lines $lines -Label "Authentication"
-$cipher = Get-NetshValue -Lines $lines -Label "Cipher"
-$signal = Get-SignalPercent (Get-NetshValue -Lines $lines -Label "Signal")
-
-if ([string]::IsNullOrWhiteSpace($ssid) -or $ssid -eq "N/A") {
-    throw "Windows did not report a Wi-Fi SSID"
-}
-
-if ([string]::IsNullOrWhiteSpace($authentication)) { $authentication = "UNKNOWN" }
-if ([string]::IsNullOrWhiteSpace($cipher)) { $cipher = "UNKNOWN" }
-
-$authUpper = $authentication.ToUpperInvariant()
-$cipherUpper = $cipher.ToUpperInvariant()
-$securityEnabled = $authUpper -notmatch "OPEN|NONE"
-
-$scan = [ordered]@{
-    schemaVersion = 1
+$report = [ordered]@{
+    schemaVersion = 2
     capturedAtUtc = [DateTime]::UtcNow.ToString("o")
-    interfaceName = "netsh wlan"
-    ssid = $ssid
-    signalQualityPercent = $signal
-    authentication = $authentication
-    cipher = $cipher
-    securityEnabled = [bool]$securityEnabled
-    enterpriseAuthentication = $authUpper -match "ENTERPRISE|802\.1X"
+    interfaceName = "Windows WLAN"
+    networks = @($networks | Sort-Object -Property @{ Expression = "signalQualityPercent"; Descending = $true }, ssid)
 }
-
-$json = ConvertTo-Json -InputObject ([pscustomobject]$scan) -Depth 4
+$json = ConvertTo-Json -InputObject ([pscustomobject]$report) -Depth 5
 $resolvedOutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 $outputDirectory = [System.IO.Path]::GetDirectoryName($resolvedOutputPath)
 if (-not [System.IO.Directory]::Exists($outputDirectory)) {
     [System.IO.Directory]::CreateDirectory($outputDirectory) | Out-Null
 }
 [System.IO.File]::WriteAllText($resolvedOutputPath, $json, [System.Text.UTF8Encoding]::new($false))
-Write-Output "Wi-Fi scan report saved to: $resolvedOutputPath"
+Write-Output "Nearby Wi-Fi scan report saved to: $resolvedOutputPath"
+Write-Output ("Networks found: " + $networks.Count)
