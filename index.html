@@ -443,7 +443,7 @@
           <p class="sub">ใช้ Microsoft Defender Antivirus บน Windows ตรวจไฟล์ที่คุณเลือก โดยไฟล์ต้นฉบับไม่ถูกส่งเข้าเว็บไซต์หรือ Backend</p>
           <div class="callout info">ตัวช่วยทำงานบนเครื่อง Windows ของคุณเอง ใช้ได้เมื่อ Microsoft Defender Antivirus เปิดใช้งานอยู่ ตัวช่วยจะไม่ส่งไฟล์หรือ path ไปยังเซิร์ฟเวอร์ แต่ Defender อาจกักกันหรือลบภัยคุกคามตามการตั้งค่าของ Windows</div>
           <ol class="sub">
-            <li><a href="/virus-scan.ps1">ดาวน์โหลดตัวช่วยสแกนไวรัสในเครื่อง</a></li>
+            <li><a href="./virus-scan.ps1">ดาวน์โหลดตัวช่วยสแกนไวรัสในเครื่อง</a></li>
             <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง จากนั้นเลือกไฟล์ในหน้าต่างที่เปิดขึ้น</li>
             <li>เลือกไฟล์รายงานที่ตัวช่วยสร้าง แล้วกดวิเคราะห์เพื่อดูจำนวนไฟล์ ผลตรวจพบ และไฟล์ที่สแกนไม่สำเร็จ</li>
           </ol>
@@ -497,7 +497,7 @@
           <p class="sub">ตัวช่วย Windows อ่านชื่อเครือข่ายที่เชื่อมต่อ, คุณภาพสัญญาณ และชนิดการยืนยันตัวตน/การเข้ารหัสจาก Native Wi-Fi API แล้วบันทึกรายงานไว้ในเครื่อง</p>
           <div class="callout info">เว็บไม่สามารถอ่านข้อมูล Wi-Fi จากเบราว์เซอร์ได้โดยตรง จึงต้องดาวน์โหลดและเรียกใช้ตัวช่วย Windows ด้วยตนเอง การตรวจนี้อ่านเฉพาะเครือข่ายที่เชื่อมต่ออยู่ ไม่สแกนเครือข่ายรอบข้าง และไม่ส่งรายงานไปยังเซิร์ฟเวอร์</div>
           <ol class="sub">
-            <li><a href="/wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
+            <li><a href="./wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
             <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง (เป็นการอนุญาตเฉพาะการเรียกครั้งนี้) ระบบจะสร้าง <code>wifi-scan.json</code> บน Desktop</li>
             <li>เลือกไฟล์รายงานด้านล่างเพื่อแสดงระดับสัญญาณและประเมินความเสี่ยง</li>
           </ol>
@@ -535,8 +535,9 @@
     "use strict";
 
     const configuredApi = window.SECURITY_SCANNER_API_BASE || new URLSearchParams(window.location.search).get("api") || "";
-    const API_BASE = configuredApi.replace(/\/$/, "");
-    const apiUrl = (path) => API_BASE + path;
+    const isGitHubPages = window.location.hostname.endsWith(".github.io");
+    const API_BASE = configuredApi ? configuredApi.replace(/\/$/, "") : isGitHubPages || window.location.protocol === "file:" ? "" : window.location.origin;
+    const apiUrl = (path) => API_BASE ? API_BASE + path : null;
 
     const state = {
       scans: 0,
@@ -939,6 +940,16 @@
     }
 
     async function checkBackendHealth() {
+      if (!API_BASE) {
+        updateServiceStatus("apiHealth", false, "ไม่มี Backend");
+        updateServiceStatus("queueHealth", false, "ไม่มี Backend");
+        updateServiceStatus("dbHealth", false, "ไม่มี Backend");
+        updateServiceStatus("virusEngineHealth", false, "ไม่มี Backend");
+        document.getElementById("backendStatusText").textContent = "เว็บ Static · ไม่มี Backend";
+        document.getElementById("backendStatusDot").style.background = "var(--muted)";
+        document.getElementById("virusWorkerState").textContent = "ไม่มี Backend";
+        return;
+      }
       try {
         const response = await fetch(apiUrl("/api/v1/health"), { cache: "no-store" });
         if (!response.ok) throw new Error("Backend ตอบกลับ HTTP " + response.status);
@@ -1141,33 +1152,46 @@
       const input = document.getElementById("websiteUrl");
       const output = document.getElementById("websiteResults");
       const button = event.currentTarget.querySelector("button[type=submit]");
-      const target = input.value.trim();
-      if (!/^https?:\/\//i.test(target)) {
-        renderFindings(output, [{ level: "info", title: "URL ??????????", detail: "????????? URL ??? HTTP/HTTPS" }]);
-        return;
+      let target;
+      try { target = new URL(input.value.trim()); } catch {
+        renderFindings(output, [{ level: "info", title: "URL ไม่ถูกต้อง", detail: "กรุณาระบุ URL ที่ถูกต้องและขึ้นต้นด้วย HTTP หรือ HTTPS" }]); return;
       }
-      button.disabled = true;
-      button.textContent = "????????????...";
+      if (!["http:", "https:"].includes(target.protocol) || target.username || target.password) {
+        renderFindings(output, [{ level: "info", title: "URL ไม่รองรับ", detail: "อนุญาตเฉพาะ URL แบบ HTTP/HTTPS ที่ไม่มีข้อมูลรับรองฝังอยู่ใน URL" }]); return;
+      }
+      if (!document.getElementById("websiteConsent").checked) return;
+      button.disabled = true; button.textContent = "กำลังตรวจ...";
+      const findings = []; const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 10000);
       try {
-        const response = await fetch(apiUrl("/api/v1/website-headers"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: target }),
-          cache: "no-store"
-        });
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(payload.detail || "Backend ??????? HTTP " + response.status);
-        const findings = Array.isArray(payload.findings) ? payload.findings : [];
-        findings.push({ level: "info", title: "??????????????????", detail: "???? headers ???? HEAD request ??? backend ????????? redirect ?????????????????????????????????????????" });
-        renderFindings(output, findings, "?????????????? headers ??????????");
-        finishScan("website-headers", findings, payload.url || target);
+        const response = await fetch(target.href, { method: "HEAD", mode: "cors", credentials: "omit", cache: "no-store", signal: controller.signal });
+        const headers = [
+          ["Content-Security-Policy", "medium", "กำหนด Content-Security-Policy เพื่อลดความเสี่ยงจากสคริปต์และเนื้อหาที่ไม่คาดหมาย"],
+          ["X-Content-Type-Options", "low", "ตั้งค่า X-Content-Type-Options: nosniff เพื่อป้องกันการเดาชนิด MIME"],
+          ["Referrer-Policy", "low", "กำหนด Referrer-Policy เพื่อลดการส่ง URL อ้างอิงไปยังเว็บไซต์อื่น"],
+          ["Permissions-Policy", "low", "กำหนด Permissions-Policy เพื่อจำกัดการใช้ความสามารถของ browser"],
+          ["Strict-Transport-Security", "medium", "สำหรับ HTTPS ให้ตั้งค่า Strict-Transport-Security หลังตรวจสอบโดเมนย่อย"]
+        ];
+        if (target.origin === window.location.origin) {
+          for (const [name, level, recommendation] of headers) {
+            if (name === "Strict-Transport-Security" && target.protocol !== "https:") continue;
+            if (!response.headers.get(name)) findings.push({ level, title: "ไม่พบ " + name, detail: recommendation, recommendation });
+          }
+          const csp = response.headers.get("Content-Security-Policy") || "";
+          if (!response.headers.get("X-Frame-Options") && !/frame-ancestors/i.test(csp)) findings.push({ level: "medium", title: "ไม่พบการป้องกันการฝังหน้าเว็บ", detail: "ตั้งค่า X-Frame-Options หรือ directive frame-ancestors ใน Content-Security-Policy เพื่อลดความเสี่ยง clickjacking" });
+        } else {
+          const readable = headers.map(([name]) => name).concat(["X-Frame-Options", "Server"]).filter((name) => response.headers.has(name));
+          findings.push({ level: "info", title: "ตรวจ headers ข้าม origin ได้จำกัด", detail: readable.length ? "Browser อ่านได้เฉพาะ headers ที่เว็บไซต์เปิดผ่าน CORS: " + readable.join(", ") : "เว็บไซต์ไม่ได้เปิด security headers ให้ browser อ่านผ่าน CORS จึงไม่สรุปว่า header มีหรือขาด" });
+        }
+        findings.push({ level: "info", title: "ตรวจ HTTP HEAD สำเร็จ", detail: "ได้รับสถานะ HTTP " + response.status + " ผลตรวจจำกัดเฉพาะ headers ที่ browser อ่านได้" });
+        renderFindings(output, findings, "การตรวจแบบ Passive ไม่ได้ crawl หรือทดสอบการโจมตี");
+        finishScan("website-headers", findings, target.href);
       } catch (error) {
-        const findings = [{ level: "info", title: "?????????????????????", detail: error.message }];
-        renderFindings(output, findings);
-        finishScan("website-headers", findings, target);
+        const reason = error.name === "AbortError" ? "คำขอหมดเวลา: หยุดรอหลัง 10 วินาที" : "Browser อ่านคำตอบไม่ได้ อาจเป็นเพราะเว็บไซต์ไม่อนุญาต CORS หรือปฏิเสธคำขอ HEAD";
+        const failed = [{ level: "info", title: "ตรวจ headers ไม่สำเร็จ", detail: reason }];
+        renderFindings(output, failed); finishScan("website-headers", failed, target.href);
       } finally {
-        button.disabled = false;
-        button.textContent = "???????????? Passive";
+        window.clearTimeout(timeout); button.disabled = false; button.textContent = "เริ่มตรวจแบบ Passive";
       }
     });
 
@@ -1362,6 +1386,11 @@
           return;
         }
 
+        if (!API_BASE) {
+          renderFindings(output, [{ level: "info", title: "ไม่มี Backend สำหรับสแกนไฟล์", detail: "GitHub Pages ให้บริการเฉพาะไฟล์ static ใช้ตัวช่วย Microsoft Defender ในเครื่องเพื่อสแกนโดยไม่อัปโหลดไฟล์" }]);
+          return;
+        }
+
         button.disabled = true;
         button.textContent = "กำลังส่งไฟล์เข้าคิว...";
         renderFindings(output, [{
@@ -1409,7 +1438,7 @@
     });
 
     checkBackendHealth();
-    window.setInterval(checkBackendHealth, 15000);
+    if (API_BASE) window.setInterval(checkBackendHealth, 15000);
   </script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
