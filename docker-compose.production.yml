@@ -2,6 +2,7 @@ services:
   api:
     environment:
       DATABASE_URL: postgresql+psycopg://scanner:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD on the VPS}@db:5432/scanner
+      CORS_ORIGINS: ${CORS_ORIGINS:?Set CORS_ORIGINS on the VPS}
     depends_on:
       db:
         condition: service_healthy

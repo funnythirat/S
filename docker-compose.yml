@@ -12,6 +12,7 @@ services:
       QUARANTINE_DIR: /data/quarantine
       MAX_UPLOAD_BYTES: "20971520"
       YARA_RULES_PATH: /app/rules/basic_indicators.yar
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://funnythirat.github.io}
     ports:
       - "${HOST_BIND_ADDRESS:-127.0.0.1}:8000:8000"
     volumes:
@@ -48,6 +49,7 @@ services:
       QUARANTINE_DIR: /data/quarantine
       MAX_UPLOAD_BYTES: "20971520"
       YARA_RULES_PATH: /app/rules/basic_indicators.yar
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://funnythirat.github.io}
     volumes:
       - quarantine:/data/quarantine
     depends_on:
