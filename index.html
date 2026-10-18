@@ -262,7 +262,7 @@
       <section class="view active" id="view-dashboard">
         <div class="hero">
           <h2>ตรวจสุขภาพความปลอดภัยของระบบ</h2>
-          <p>ตรวจ HTTP headers แบบ passive วิเคราะห์ source code ในเครื่อง ตรวจ dependency และสแกนไฟล์ด้วย ClamAV/YARA เมื่อเปิด Backend เลือกการตรวจที่ต้องการเริ่มต้นได้เลย</p>
+          <p>ตรวจ HTTP headers แบบ passive วิเคราะห์ source code ในเครื่อง ตรวจ dependency และสแกนเครื่องด้วย Microsoft Defender โดยไม่อัปโหลดไฟล์</p>
         </div>
         <div class="stats" aria-label="สรุปผลการตรวจ">
           <div class="stat"><div class="stat-label">จำนวนการตรวจ</div><div class="stat-value cyan" id="statScans">0</div></div>
@@ -318,7 +318,7 @@
             <div class="engine-card"><div><h3>HTTP Headers</h3><p>ตรวจแบบ passive จาก browser</p></div><span class="state-label ready">พร้อม</span></div>
             <div class="engine-card"><div><h3>Source Code Rules</h3><p>วิเคราะห์ไฟล์ภายใน browser</p></div><span class="state-label ready">พร้อม</span></div>
             <div class="engine-card"><div><h3>OSV Dependency Check</h3><p>ค้นหา advisory ด้วย OSV API</p></div><span class="state-label ready">พร้อม</span></div>
-            <div class="engine-card"><div><h3>ClamAV / YARA</h3><p>สแกนไฟล์อัปโหลดใน quarantine ผ่าน backend และ worker</p></div><span class="state-label" id="virusEngineHealth">กำลังตรวจสอบ</span></div>
+            <div class="engine-card"><div><h3>Microsoft Defender</h3><p>สแกนเครื่อง Windows ในเครื่องผู้ใช้และนำเข้าเฉพาะรายงาน JSON</p></div><span class="state-label ready">พร้อมเมื่อใช้ Windows</span></div>
             <div class="engine-card"><div><h3>ZAP / Nuclei / Nmap / WPScan</h3><p>ยังไม่ได้เชื่อมต่อ และไม่อยู่ในขอบเขตการสแกนนี้</p></div><span class="state-label disabled">ปิดใช้งาน</span></div>
           </div>
         </div>
