@@ -13,14 +13,14 @@ $networks = [System.Collections.Generic.List[object]]::new()
 $current = $null
 foreach ($line in $lines) {
     if ($line -match '^\s*SSID\s+\d+\s*:\s*(.*)$') {
-        $current = [ordered]@{
+        $current = [pscustomobject]@{
             ssid = $Matches[1].Trim()
             authentication = "UNKNOWN"
             cipher = "UNKNOWN"
             signalQualityPercent = 0
             bssidCount = 0
         }
-        $networks.Add([pscustomobject]$current)
+        $networks.Add($current)
         continue
     }
     if ($null -eq $current) { continue }
