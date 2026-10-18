@@ -296,25 +296,10 @@
           </div>
         </div>
         <div class="card" style="margin-top:14px">
-          <h2>สแกนไฟล์จากภาพรวม</h2>
-          <p class="sub">เลือกไฟล์และเริ่มสแกนด้วย ClamAV ได้จากหน้านี้เลย หรือเลือกโหมดเชิงลึกเพื่อเพิ่ม YARA</p>
-          <div class="callout">สแกนได้เฉพาะไฟล์ที่เลือกและต้องเชื่อมต่อ Backend/worker ที่พร้อมใช้งาน ไฟล์จะถูกส่งไปกักไว้ชั่วคราวบนเซิร์ฟเวอร์และไม่ถูกรัน</div>
-          <form id="dashboardVirusScanForm" class="form-grid virus-scan-form" data-results="dashboardVirusScanResults">
-            <label for="dashboardVirusFiles">เลือกไฟล์ (สูงสุด 10 ไฟล์, ไฟล์ละไม่เกิน 20 MiB)
-              <input type="file" id="dashboardVirusFiles" multiple required>
-            </label>
-            <div>
-              <label>โหมดการตรวจ</label>
-              <div class="mode-options" style="margin-top:8px">
-                <label class="mode-option"><input type="radio" name="dashboardVirusMode" value="standard" checked><span><strong>สแกนปกติ</strong><small>ClamAV signature scan รวมการตรวจ archive ตามขีดจำกัดของ engine</small></span></label>
-                <label class="mode-option"><input type="radio" name="dashboardVirusMode" value="deep"><span><strong>สแกนเชิงลึก</strong><small>ClamAV + YARA heuristic scan; ใช้เวลามากขึ้นและอาจแจ้งเตือนผิดพลาด</small></span></label>
-              </div>
-            </div>
-            <label class="checkline"><input type="checkbox" required><span>ฉันมีสิทธิ์ส่งไฟล์นี้ให้ระบบตรวจ และยินยอมให้จัดเก็บชั่วคราวบนเซิร์ฟเวอร์ระหว่างสแกน</span></label>
-            <button class="btn" type="submit">ส่งไฟล์เข้าคิวสแกน</button>
-          </form>
-          <div id="dashboardVirusScanJobs" class="results" aria-live="polite"><div class="empty">ยังไม่มีงานสแกน</div></div>
-          <div id="dashboardVirusScanResults" class="results" aria-live="polite"><div class="empty">ผลและคำแนะนำจะแสดงหลัง worker สแกนเสร็จ</div></div>
+          <h2>?????????????? Windows</h2>
+          <p class="sub">??????????????????????????????? Microsoft Defender ?????????????????</p>
+          <div class="callout info">????????? ??????????? ????????????????????????????? QuickScan, FullScan ??????????????????????????</div>
+          <button class="btn" type="button" data-go="virus">??????????????????</button>
         </div>
         <div class="card" style="margin-top:14px">
           <h2>สถานะองค์ประกอบระบบ</h2>
@@ -443,7 +428,7 @@
           <p class="sub">ใช้ Microsoft Defender Antivirus บน Windows ตรวจไฟล์ที่คุณเลือก โดยไฟล์ต้นฉบับไม่ถูกส่งเข้าเว็บไซต์หรือ Backend</p>
           <div class="callout info">ตัวช่วยทำงานบนเครื่อง Windows ของคุณเอง ใช้ได้เมื่อ Microsoft Defender Antivirus เปิดใช้งานอยู่ ตัวช่วยจะไม่ส่งไฟล์หรือ path ไปยังเซิร์ฟเวอร์ แต่ Defender อาจกักกันหรือลบภัยคุกคามตามการตั้งค่าของ Windows</div>
           <ol class="sub">
-            <li><a href="./virus-scan.ps1">ดาวน์โหลดตัวช่วยสแกนไวรัสในเครื่อง</a></li>
+            <li><a href="/virus-scan.ps1">ดาวน์โหลดตัวช่วยสแกนไวรัสในเครื่อง</a></li>
             <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง จากนั้นเลือกไฟล์ในหน้าต่างที่เปิดขึ้น</li>
             <li>เลือกไฟล์รายงานที่ตัวช่วยสร้าง แล้วกดวิเคราะห์เพื่อดูจำนวนไฟล์ ผลตรวจพบ และไฟล์ที่สแกนไม่สำเร็จ</li>
           </ol>
@@ -465,25 +450,17 @@
           </div>
           <div id="localVirusScanResults" class="results" aria-live="polite"><div class="empty">ผลการสแกนในเครื่องจะแสดงที่นี่</div></div>
         </div>
-        <div class="card">
-          <h2>สแกนไวรัสและไฟล์ต้องสงสัย</h2>
-          <p class="sub">ทางเลือกเพิ่มเติม: ส่งไฟล์ไปให้ ClamAV/YARA ตรวจผ่าน Backend ซึ่งจะอัปโหลดไฟล์ไปกักไว้ชั่วคราวบนเซิร์ฟเวอร์</p>
-          <div class="callout">ถ้าไม่ต้องการอัปโหลดไฟล์ ให้ใช้ส่วน “สแกนในเครื่อง” ด้านบนแทน การสแกนผ่าน Backend ด้านล่างเหมาะเมื่อคุณยินยอมส่งไฟล์ไปตรวจและมีสิทธิ์ในไฟล์นั้น</div>
-          <form id="virusScanForm" class="form-grid virus-scan-form" data-results="virusScanResults">
-            <label for="virusFiles">เลือกไฟล์ (สูงสุด 10 ไฟล์, ไฟล์ละไม่เกิน 20 MiB)
-              <input type="file" id="virusFiles" multiple required>
-            </label>
-            <div>
-              <label>โหมดการตรวจ</label>
-              <div class="mode-options" style="margin-top:8px">
-                <label class="mode-option"><input type="radio" name="virusMode" value="standard" checked><span><strong>สแกนปกติ</strong><small>ClamAV signature scan รวมการตรวจ archive ตามขีดจำกัดของ engine</small></span></label>
-                <label class="mode-option"><input type="radio" name="virusMode" value="deep"><span><strong>สแกนเชิงลึก</strong><small>ClamAV + YARA heuristic scan; ใช้เวลามากขึ้นและอาจแจ้งเตือนผิดพลาด</small></span></label>
-              </div>
-            </div>
-            <label class="checkline"><input type="checkbox" id="virusConsent" required><span>ฉันมีสิทธิ์ส่งไฟล์นี้ให้ระบบตรวจ และยินยอมให้จัดเก็บชั่วคราวบนเซิร์ฟเวอร์ระหว่างสแกน</span></label>
-            <button class="btn" type="submit">ส่งไฟล์เข้าคิวสแกน</button>
-          </form>
-          <div id="virusScanJobs" class="results" aria-live="polite"><div class="empty">ยังไม่มีงานสแกน</div></div>
+        <div class="card" style="margin-top:14px">
+          <h2>?????????????? Windows</h2>
+          <p class="sub">??????????????????????????????? Microsoft Defender ?????????????????</p>
+          <div class="callout info">????????? ??????????? ????????????????????????????? QuickScan, FullScan ??????????????????????????</div>
+          <button class="btn" type="button" data-go="virus">??????????????????</button>
+        </div>
+<div class="card" style="margin-top:14px">
+          <h2>?????????????? Windows</h2>
+          <p class="sub">??????????????????????????????? Microsoft Defender ?????????????????</p>
+          <div class="callout info">????????? ??????????? ????????????????????????????? QuickScan, FullScan ??????????????????????????</div>
+          <button class="btn" type="button" data-go="virus">??????????????????</button>
         </div>
         <div class="card" style="margin-top:14px">
           <h2>ผลการตรวจและแนวทางแก้ไข</h2>
@@ -493,30 +470,25 @@
       </section>
       <section class="view" id="view-wifi">
         <div class="card">
-          <h2>ตรวจสอบ Wi-Fi รอบตัว</h2>
-          <p class="sub">สแกนรายชื่อเครือข่าย Wi-Fi ที่อุปกรณ์ Windows มองเห็น พร้อมระดับสัญญาณ วิธีตรวจสอบตัวตน และการเข้ารหัส ก่อนที่คุณจะเลือกเชื่อมต่อ</p>
-          <div class="callout info">เบราว์เซอร์อ่านสัญญาณ Wi-Fi โดยตรงไม่ได้ ให้เรียกตัวช่วย Windows ด้านล่างเพื่อสำรวจเครือข่ายใกล้เคียง ตัวช่วยจะไม่เชื่อมต่อกับเครือข่ายใด ไม่อ่านรหัสผ่าน และไม่ส่งรายงานขึ้นเซิร์ฟเวอร์</div>
+          <h2>ตรวจสอบ Wi-Fi ที่เชื่อมต่ออยู่</h2>
+          <p class="sub">ตัวช่วย Windows อ่านชื่อเครือข่ายที่เชื่อมต่อ, คุณภาพสัญญาณ และชนิดการยืนยันตัวตน/การเข้ารหัสจากคำสั่ง netsh wlan แล้วบันทึกรายงานไว้ในเครื่อง</p>
+          <div class="callout info">เว็บไม่สามารถอ่านข้อมูล Wi-Fi จากเบราว์เซอร์ได้โดยตรง จึงต้องดาวน์โหลดและเรียกใช้ตัวช่วย Windows ด้วยตนเอง การตรวจนี้อ่านเฉพาะเครือข่ายที่เชื่อมต่ออยู่ ไม่สแกนเครือข่ายรอบข้าง และไม่ส่งรายงานไปยังเซิร์ฟเวอร์</div>
           <ol class="sub">
-            <li><a href="./wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
-            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง ระบบจะสร้างรายชื่อเครือข่ายและคุณภาพสัญญาณไว้ใน <code>wifi-scan.json</code> บน Desktop</li>
-            <li>เลือกไฟล์รายงานด้านล่าง แล้วกด “รายละเอียด” ข้างเครือข่ายเพื่อดูความเสี่ยง</li>
+            <li><a href="/wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
+            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง (เป็นการอนุญาตเฉพาะการเรียกครั้งนี้) ระบบจะสร้าง <code>wifi-scan.json</code> บน Desktop</li>
+            <li>เลือกไฟล์รายงานด้านล่างเพื่อแสดงระดับสัญญาณและประเมินความเสี่ยง</li>
           </ol>
           <code class="command">powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\wifi-scan.ps1"</code>
           <div class="callout">ผลประเมินดูเฉพาะการตั้งค่าการยืนยันตัวตน/การเข้ารหัสที่ Windows รายงาน ไม่ใช่การยืนยันว่าเครือข่ายปลอดภัยทั้งหมด ความแข็งแรงรหัสผ่าน, WPS, firmware, การตั้งค่า router และอุปกรณ์อื่นในเครือข่ายตรวจไม่ได้จากเครื่องลูกข่าย</div>
           <form id="wifiScanForm" class="form-grid">
-            <label for="wifiReportFile">รายงานเครือข่ายรอบตัวจากตัวช่วย Windows
+            <label for="wifiReportFile">รายงานจากตัวช่วย Windows
               <input type="file" id="wifiReportFile" accept=".json,application/json" required>
             </label>
-            <button class="btn" type="submit">แสดงเครือข่ายและตรวจความเสี่ยง</button>
+            <button class="btn" type="submit">วิเคราะห์รายงาน Wi-Fi</button>
           </form>
         </div>
         <div class="card" style="margin-top:14px">
-          <h2>เครือข่ายที่พบ</h2>
-          <p class="sub">ความแรงสัญญาณไม่ใช่คะแนนความปลอดภัย ระดับความเสี่ยงเป็นการคัดกรองจากชนิดการยืนยันตัวตนและการเข้ารหัสที่ระบบรายงาน</p>
-          <div id="wifiNetworks" class="table-wrap" hidden aria-live="polite"></div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h2>รายละเอียดเครือข่ายที่เลือก</h2>
+          <h2>ผลการตรวจ</h2>
           <p class="sub">จำนวนความเสี่ยงคือจำนวนประเด็นที่ตรงกับกฎตรวจ ไม่ใช่เปอร์เซ็นต์โอกาสถูกโจมตี</p>
           <div id="wifiSummary" class="wifi-summary" hidden>
             <div class="wifi-metric"><span>สถานะความปลอดภัย</span><strong id="wifiSecurityStatus"></strong></div>
@@ -540,9 +512,8 @@
     "use strict";
 
     const configuredApi = window.SECURITY_SCANNER_API_BASE || new URLSearchParams(window.location.search).get("api") || "";
-    const isGitHubPages = window.location.hostname.endsWith(".github.io");
-    const API_BASE = configuredApi ? configuredApi.replace(/\/$/, "") : isGitHubPages || window.location.protocol === "file:" ? "" : window.location.origin;
-    const apiUrl = (path) => API_BASE ? API_BASE + path : null;
+    const API_BASE = configuredApi.replace(/\/$/, "");
+    const apiUrl = (path) => API_BASE + path;
 
     const state = {
       scans: 0,
@@ -578,108 +549,168 @@
     navButtons.forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
     document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
 
-    function assessWifiNetwork(network) {
-      const authentication = network.authentication.toUpperCase();
-      const cipher = network.cipher.toUpperCase();
-      const findings = [];
-      const isOpen = !network.securityEnabled || /OPEN|NONE/.test(authentication) || cipher === "NONE";
-      const isLegacy = /WEP|SHARED|WPA-NONE/.test(authentication) || /WEP/.test(cipher);
-      const isOldWpa = /^WPA(?:-PERSONAL|-PSK)?$/.test(authentication);
-      const isTkip = cipher === "TKIP";
-      const unknown = /UNKNOWN|NOT SUPPORTED/.test(authentication + " " + cipher);
-      if (isOpen) {
-        findings.push({ level: "high", title: "เครือข่ายเปิดหรือไม่มีการเข้ารหัส", detail: "ผู้ที่อยู่ในระยะสัญญาณอาจดักอ่านหรือปลอมแปลงการเชื่อมต่อได้ หลีกเลี่ยงการส่งข้อมูลสำคัญ และเลือกเครือข่าย WPA2-AES หรือ WPA3" });
-      } else if (isLegacy) {
-        findings.push({ level: "high", title: "พบการยืนยันตัวตน/การเข้ารหัสล้าสมัย", detail: "WEP, Shared Key หรือ WPA-NONE ไม่ปลอดภัยเพียงพอ ควรหลีกเลี่ยงหรือให้เจ้าของเราเตอร์เปลี่ยนเป็น WPA2-AES หรือ WPA3" });
-      } else {
-        if (isOldWpa) findings.push({ level: "medium", title: "ใช้ WPA รุ่นเก่า", detail: "ควรเปลี่ยนเป็น WPA2-AES หรือ WPA3" });
-        if (isTkip) findings.push({ level: "medium", title: "ใช้การเข้ารหัส TKIP", detail: "TKIP เลิกแนะนำแล้ว ควรใช้ AES/CCMP หรือ GCMP" });
-        const modernProtected = /WPA2|WPA3/.test(authentication) && /CCMP|AES|GCMP/.test(cipher);
-        if (!unknown && !modernProtected && findings.length === 0) findings.push({ level: "medium", title: "ควรตรวจสอบชนิดการป้องกันเพิ่มเติม", detail: "ไม่พบรูปแบบ WPA2/WPA3 ร่วมกับ AES/CCMP ที่คาดหวัง อย่าใช้เครือข่ายนี้ส่งข้อมูลสำคัญจนกว่าจะยืนยันการตั้งค่า" });
-      }
-      if (unknown) findings.push({ level: "info", title: "ข้อมูลความปลอดภัยไม่เพียงพอ", detail: "Windows รายงานชนิดการยืนยันตัวตนหรือการเข้ารหัสที่เครื่องมือนี้ไม่รู้จัก จึงไม่สรุปว่าเครือข่ายปลอดภัย" });
-      if (!findings.length) findings.push({ level: "info", title: "ไม่พบสัญญาณการตั้งค่าล้าสมัย", detail: "พบการป้องกันที่รู้จัก เช่น WPA2/WPA3 กับ AES/CCMP แต่ไม่ใช่การรับรองความปลอดภัยทั้งหมดของเครือข่าย" });
-      const status = findings.some(item => item.level === "high") ? "ความเสี่ยงสูง" : findings.some(item => item.level === "medium") ? "ความเสี่ยงปานกลาง" : unknown ? "ข้อมูลไม่พอ" : "ไม่พบปัญหาชัดเจน";
-      return { findings, status, high: findings.filter(item => item.level === "high").length, medium: findings.filter(item => item.level === "medium").length, low: findings.filter(item => item.level === "low").length };
-    }
-
-    function showWifiNetwork(network, capturedAtUtc) {
-      const result = assessWifiNetwork(network);
-      const signal = network.signalQualityPercent;
-      let signalLabel = "สัญญาณอ่อน";
-      let signalClass = "low";
-      if (signal >= 80) { signalLabel = "สัญญาณดีมาก"; signalClass = ""; }
-      else if (signal >= 60) { signalLabel = "สัญญาณดี"; signalClass = ""; }
-      else if (signal >= 40) { signalLabel = "สัญญาณปานกลาง"; signalClass = "medium"; }
-      const report = { kind: "wifi-network", ssid: network.ssid, authentication: network.authentication, cipher: network.cipher, signalQualityPercent: signal, securityEnabled: network.securityEnabled, capturedAtUtc, findings: result.findings };
-      document.getElementById("wifiSecurityStatus").textContent = result.status;
-      document.getElementById("wifiSsid").textContent = network.ssid || "(เครือข่ายไม่ประกาศชื่อ)";
-      document.getElementById("wifiSignalText").textContent = signalLabel + " · " + signal + "%";
-      const signalBar = document.getElementById("wifiSignalBar");
-      signalBar.style.width = signal + "%";
-      signalBar.className = "wifi-signal-fill " + signalClass;
-      document.getElementById("wifiHighCount").textContent = String(result.high);
-      document.getElementById("wifiMediumCount").textContent = String(result.medium);
-      document.getElementById("wifiLowCount").textContent = String(result.low);
-      document.getElementById("wifiAuthentication").textContent = network.authentication;
-      document.getElementById("wifiCipher").textContent = network.cipher;
-      document.getElementById("wifiCapturedAt").textContent = new Date(capturedAtUtc).toLocaleString("th-TH");
-      document.getElementById("wifiSummary").hidden = false;
-      renderFindings(document.getElementById("wifiResults"), result.findings);
-      finishScan("wifi-network", result.findings, network.ssid || "เครือข่ายไม่ประกาศชื่อ");
-    }
-
     document.getElementById("wifiScanForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const output = document.getElementById("wifiResults");
       const summary = document.getElementById("wifiSummary");
-      const networkList = document.getElementById("wifiNetworks");
       const file = document.getElementById("wifiReportFile").files[0];
       if (!file) return;
+
       try {
-        if (file.size > 256 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด (สูงสุด 256 KiB)");
+        if (file.size > 64 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด");
         const report = JSON.parse(await file.text());
-        if (!report || typeof report !== "object" || Array.isArray(report) || ![1, 2].includes(report.schemaVersion) || typeof report.capturedAtUtc !== "string" || Number.isNaN(Date.parse(report.capturedAtUtc))) throw new Error("รูปแบบรายงาน Wi-Fi ไม่ถูกต้อง");
-        const networks = report.schemaVersion === 1 ? [report] : report.networks;
-        if (!Array.isArray(networks) || networks.length > 1000) throw new Error("รายงานไม่มีรายการเครือข่ายที่รองรับ");
-        const valid = networks.every(network => network && typeof network.ssid === "string" && typeof network.authentication === "string" && typeof network.cipher === "string" && typeof network.securityEnabled === "boolean" && Number.isInteger(network.signalQualityPercent) && network.signalQualityPercent >= 0 && network.signalQualityPercent <= 100 && (network.bssidCount === undefined || Number.isInteger(network.bssidCount) && network.bssidCount >= 0));
-        if (!valid) throw new Error("ข้อมูลเครือข่ายหรือระดับสัญญาณในรายงานไม่ถูกต้อง");
-        networkList.replaceChildren();
-        if (!networks.length) {
-          networkList.hidden = false;
-          const empty = document.createElement("div");
-          empty.className = "empty";
-          empty.textContent = "ไม่พบเครือข่าย Wi-Fi รอบตัว ตรวจว่า Wi-Fi เปิดอยู่แล้วเรียกตัวช่วย Windows ใหม่";
-          networkList.append(empty);
-          summary.hidden = true;
-          renderFindings(output, [{ level: "info", title: "ไม่พบเครือข่าย Wi-Fi", detail: "ผลสแกนครั้งนี้ไม่มีเครือข่ายที่ Windows รายงาน" }]);
-          return;
+        if (!report || typeof report !== "object" || Array.isArray(report)) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
         }
-        const table = document.createElement("table");
-        const head = document.createElement("thead");
-        const header = document.createElement("tr");
-        ["เครือข่าย", "สัญญาณ", "การป้องกัน", "ประเมิน", "รายละเอียด"].forEach(label => { const cell = document.createElement("th"); cell.textContent = label; header.append(cell); });
-        head.append(header);
-        const body = document.createElement("tbody");
-        networks.forEach((network, index) => {
-          const risk = assessWifiNetwork(network);
-          const row = document.createElement("tr");
-          const values = [network.ssid || "(ไม่ประกาศชื่อ)", network.signalQualityPercent + "%", network.authentication + " / " + network.cipher, risk.status];
-          values.forEach(value => { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); });
-          const actionCell = document.createElement("td");
-          const button = document.createElement("button");
-          button.type = "button"; button.className = "btn secondary"; button.textContent = "รายละเอียด";
-          button.addEventListener("click", () => showWifiNetwork(network, report.capturedAtUtc));
-          actionCell.append(button); row.append(actionCell); body.append(row);
+        const signal = report.signalQualityPercent;
+        if (
+          report.schemaVersion !== 1 && report.schemaVersion !== 2 ||
+          typeof report.ssid !== "string" ||
+          !report.ssid.trim() ||
+          typeof report.authentication !== "string" ||
+          typeof report.cipher !== "string" ||
+          typeof report.securityEnabled !== "boolean" ||
+          !Number.isInteger(signal) ||
+          signal < 0 ||
+          signal > 100 ||
+          typeof report.capturedAtUtc !== "string" ||
+          Number.isNaN(Date.parse(report.capturedAtUtc))
+        ) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
+        }
+
+        const authentication = report.authentication.toUpperCase();
+        const cipher = report.cipher.toUpperCase();
+        const findings = [];
+        const isOpen = !report.securityEnabled || authentication === "OPEN" || cipher === "NONE";
+        const isLegacy = authentication === "SHARED" ||
+          authentication === "WPA-NONE" ||
+          cipher.startsWith("WEP");
+        if (isOpen) {
+          findings.push({
+            level: "high",
+            title: "เครือข่ายเปิดหรือไม่เข้ารหัส",
+            detail: "ข้อมูลระบุว่าไม่มีการป้องกันระดับ Wi-Fi เพียงพอ ผู้อื่นในระยะสัญญาณอาจดักอ่านหรือปลอมแปลงการเชื่อมต่อได้ ควรตั้งค่า WPA2-AES หรือ WPA3 ที่เราเตอร์"
+          });
+        } else if (isLegacy) {
+          findings.push({
+            level: "high",
+            title: "พบการยืนยันตัวตน/การเข้ารหัสแบบเก่า",
+            detail: "Shared Key, WPA-NONE หรือ WEP มีความปลอดภัยไม่เพียงพอ ควรเปลี่ยนเป็น WPA2-AES หรือ WPA3"
+          });
+        }
+
+        if (!isOpen && !isLegacy) {
+          if (authentication === "WPA" || authentication === "WPA-PSK") {
+            findings.push({
+              level: "medium",
+              title: "ใช้ WPA รุ่นเก่า",
+              detail: "WPA เดิมมีข้อจำกัดด้านความปลอดภัย ควรเปลี่ยนการตั้งค่าเราเตอร์เป็น WPA2-AES หรือ WPA3"
+            });
+          }
+          if (cipher === "TKIP") {
+            findings.push({
+              level: "medium",
+              title: "พบการเข้ารหัส TKIP",
+              detail: "TKIP เป็นวิธีเข้ารหัสรุ่นเก่าที่ไม่แนะนำ ควรใช้ AES/CCMP หรือ GCMP"
+            });
+          }
+        }
+
+        const recognizedAuthentication = [
+          "OPEN",
+          "SHARED",
+          "WPA",
+          "WPA-PSK",
+          "WPA-NONE",
+          "WPA2",
+          "WPA2-PSK",
+          "WPA3",
+          "WPA3-SAE",
+          "WPA3-ENT",
+          "WPA3-ENT-192"
+        ].includes(authentication);
+        const recognizedCipher = [
+          "NONE",
+          "WEP40",
+          "WEP104",
+          "TKIP",
+          "AES-CCMP",
+          "GCMP",
+          "GCMP-256",
+          "CCMP-256",
+          "BIP",
+          "BIP-GMAC-128",
+          "BIP-GMAC-256",
+          "BIP-CMAC-256"
+        ].includes(cipher);
+        const unknownSecurity = authentication.startsWith("UNKNOWN") ||
+          cipher.startsWith("UNKNOWN") ||
+          !recognizedAuthentication ||
+          !recognizedCipher;
+        if (unknownSecurity) {
+          findings.push({
+            level: "info",
+            title: "ข้อมูลความปลอดภัยบางส่วนยังประเมินไม่ได้",
+            detail: "Windows รายงานชนิดการยืนยันตัวตนหรือการเข้ารหัสที่เครื่องมือนี้ไม่รู้จัก จึงไม่สรุปว่าเครือข่ายปลอดภัย"
+          });
+        } else if (!isOpen && !isLegacy && findings.length === 0) {
+          findings.push({
+            level: "info",
+            title: "ไม่พบสัญญาณการตั้งค่าล้าสมัยจากข้อมูลที่อ่านได้",
+            detail: "พบการยืนยันตัวตนและการเข้ารหัสที่รองรับ ไม่ใช่การรับรองความปลอดภัยทั้งหมดของเครือข่าย"
+          });
+        }
+
+        let signalLabel = "สัญญาณอ่อน";
+        let signalClass = "low";
+        if (signal >= 80) {
+          signalLabel = "สัญญาณดีมาก";
+          signalClass = "";
+        } else if (signal >= 60) {
+          signalLabel = "สัญญาณดี";
+          signalClass = "";
+        } else if (signal >= 40) {
+          signalLabel = "สัญญาณปานกลาง";
+          signalClass = "medium";
+        }
+        findings.push({
+          level: "info",
+          title: signalLabel + " (" + signal + "%)",
+          detail: "เปอร์เซ็นต์นี้เป็นคุณภาพสัญญาณที่ Windows รายงาน ไม่ใช่ความเสี่ยงด้านความปลอดภัย สัญญาณอ่อนอาจทำให้การเชื่อมต่อไม่เสถียร"
         });
-        table.append(head, body);
-        networkList.replaceChildren(table);
-        networkList.hidden = false;
-        showWifiNetwork(networks[0], report.capturedAtUtc);
+
+        const highCount = findings.filter((finding) => finding.level === "high").length;
+        const mediumCount = findings.filter((finding) => finding.level === "medium").length;
+        const lowCount = findings.filter((finding) => finding.level === "low").length;
+        let securityStatus = "ไม่พบปัญหาจากค่าที่อ่านได้";
+        if (highCount > 0) securityStatus = "ความเสี่ยงสูง";
+        else if (mediumCount > 0) securityStatus = "ความเสี่ยงปานกลาง";
+        else if (unknownSecurity) securityStatus = "ข้อมูลไม่พอสรุป";
+
+        document.getElementById("wifiSecurityStatus").textContent = securityStatus;
+        document.getElementById("wifiSsid").textContent = report.ssid;
+        document.getElementById("wifiSignalText").textContent = signalLabel + " · " + signal + "%";
+        const signalBar = document.getElementById("wifiSignalBar");
+        signalBar.style.width = signal + "%";
+        signalBar.className = "wifi-signal-fill " + signalClass;
+        document.getElementById("wifiHighCount").textContent = String(highCount);
+        document.getElementById("wifiMediumCount").textContent = String(mediumCount);
+        document.getElementById("wifiLowCount").textContent = String(lowCount);
+        document.getElementById("wifiAuthentication").textContent = report.authentication;
+        document.getElementById("wifiCipher").textContent = report.cipher;
+        document.getElementById("wifiCapturedAt").textContent = new Date(report.capturedAtUtc).toLocaleString("th-TH");
+        summary.hidden = false;
+        renderFindings(output, findings);
       } catch (error) {
         summary.hidden = true;
-        networkList.hidden = true;
-        renderFindings(output, [{ level: "info", title: "อ่านรายงาน Wi-Fi ไม่สำเร็จ", detail: error instanceof SyntaxError ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก wifi-scan.json จากตัวช่วย Windows" : error.message }]);
+        renderFindings(output, [{
+          level: "info",
+          title: "อ่านรายงาน Wi-Fi ไม่สำเร็จ",
+          detail: error instanceof SyntaxError
+            ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก wifi-scan.json ที่สร้างจากตัวช่วย"
+            : error.message
+        }]);
       }
     });
 
@@ -697,7 +728,7 @@
           throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Microsoft Defender");
         }
         if (
-          report.schemaVersion !== 1 ||
+          report.schemaVersion !== 1 && report.schemaVersion !== 2 ||
           report.engine !== "Microsoft Defender" ||
           !Array.isArray(report.files) ||
           report.files.length === 0 ||
@@ -885,16 +916,6 @@
     }
 
     async function checkBackendHealth() {
-      if (!API_BASE) {
-        updateServiceStatus("apiHealth", false, "ไม่มี Backend");
-        updateServiceStatus("queueHealth", false, "ไม่มี Backend");
-        updateServiceStatus("dbHealth", false, "ไม่มี Backend");
-        updateServiceStatus("virusEngineHealth", false, "ไม่มี Backend");
-        document.getElementById("backendStatusText").textContent = "เว็บ Static · ไม่มี Backend";
-        document.getElementById("backendStatusDot").style.background = "var(--muted)";
-        document.getElementById("virusWorkerState").textContent = "ไม่มี Backend";
-        return;
-      }
       try {
         const response = await fetch(apiUrl("/api/v1/health"), { cache: "no-store" });
         if (!response.ok) throw new Error("Backend ตอบกลับ HTTP " + response.status);
@@ -1097,46 +1118,33 @@
       const input = document.getElementById("websiteUrl");
       const output = document.getElementById("websiteResults");
       const button = event.currentTarget.querySelector("button[type=submit]");
-      let target;
-      try { target = new URL(input.value.trim()); } catch {
-        renderFindings(output, [{ level: "info", title: "URL ไม่ถูกต้อง", detail: "กรุณาระบุ URL ที่ถูกต้องและขึ้นต้นด้วย HTTP หรือ HTTPS" }]); return;
+      const target = input.value.trim();
+      if (!/^https?:\/\//i.test(target)) {
+        renderFindings(output, [{ level: "info", title: "URL ??????????", detail: "????????? URL ??? HTTP/HTTPS" }]);
+        return;
       }
-      if (!["http:", "https:"].includes(target.protocol) || target.username || target.password) {
-        renderFindings(output, [{ level: "info", title: "URL ไม่รองรับ", detail: "อนุญาตเฉพาะ URL แบบ HTTP/HTTPS ที่ไม่มีข้อมูลรับรองฝังอยู่ใน URL" }]); return;
-      }
-      if (!document.getElementById("websiteConsent").checked) return;
-      button.disabled = true; button.textContent = "กำลังตรวจ...";
-      const findings = []; const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 10000);
+      button.disabled = true;
+      button.textContent = "????????????...";
       try {
-        const response = await fetch(target.href, { method: "HEAD", mode: "cors", credentials: "omit", cache: "no-store", signal: controller.signal });
-        const headers = [
-          ["Content-Security-Policy", "medium", "กำหนด Content-Security-Policy เพื่อลดความเสี่ยงจากสคริปต์และเนื้อหาที่ไม่คาดหมาย"],
-          ["X-Content-Type-Options", "low", "ตั้งค่า X-Content-Type-Options: nosniff เพื่อป้องกันการเดาชนิด MIME"],
-          ["Referrer-Policy", "low", "กำหนด Referrer-Policy เพื่อลดการส่ง URL อ้างอิงไปยังเว็บไซต์อื่น"],
-          ["Permissions-Policy", "low", "กำหนด Permissions-Policy เพื่อจำกัดการใช้ความสามารถของ browser"],
-          ["Strict-Transport-Security", "medium", "สำหรับ HTTPS ให้ตั้งค่า Strict-Transport-Security หลังตรวจสอบโดเมนย่อย"]
-        ];
-        if (target.origin === window.location.origin) {
-          for (const [name, level, recommendation] of headers) {
-            if (name === "Strict-Transport-Security" && target.protocol !== "https:") continue;
-            if (!response.headers.get(name)) findings.push({ level, title: "ไม่พบ " + name, detail: recommendation, recommendation });
-          }
-          const csp = response.headers.get("Content-Security-Policy") || "";
-          if (!response.headers.get("X-Frame-Options") && !/frame-ancestors/i.test(csp)) findings.push({ level: "medium", title: "ไม่พบการป้องกันการฝังหน้าเว็บ", detail: "ตั้งค่า X-Frame-Options หรือ directive frame-ancestors ใน Content-Security-Policy เพื่อลดความเสี่ยง clickjacking" });
-        } else {
-          const readable = headers.map(([name]) => name).concat(["X-Frame-Options", "Server"]).filter((name) => response.headers.has(name));
-          findings.push({ level: "info", title: "ตรวจ headers ข้าม origin ได้จำกัด", detail: readable.length ? "Browser อ่านได้เฉพาะ headers ที่เว็บไซต์เปิดผ่าน CORS: " + readable.join(", ") : "เว็บไซต์ไม่ได้เปิด security headers ให้ browser อ่านผ่าน CORS จึงไม่สรุปว่า header มีหรือขาด" });
-        }
-        findings.push({ level: "info", title: "ตรวจ HTTP HEAD สำเร็จ", detail: "ได้รับสถานะ HTTP " + response.status + " ผลตรวจจำกัดเฉพาะ headers ที่ browser อ่านได้" });
-        renderFindings(output, findings, "การตรวจแบบ Passive ไม่ได้ crawl หรือทดสอบการโจมตี");
-        finishScan("website-headers", findings, target.href);
+        const response = await fetch(apiUrl("/api/v1/website-headers"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: target }),
+          cache: "no-store"
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.detail || "Backend ??????? HTTP " + response.status);
+        const findings = Array.isArray(payload.findings) ? payload.findings : [];
+        findings.push({ level: "info", title: "??????????????????", detail: "???? headers ???? HEAD request ??? backend ????????? redirect ?????????????????????????????????????????" });
+        renderFindings(output, findings, "?????????????? headers ??????????");
+        finishScan("website-headers", findings, payload.url || target);
       } catch (error) {
-        const reason = error.name === "AbortError" ? "คำขอหมดเวลา: หยุดรอหลัง 10 วินาที" : "Browser อ่านคำตอบไม่ได้ อาจเป็นเพราะเว็บไซต์ไม่อนุญาต CORS หรือปฏิเสธคำขอ HEAD";
-        const failed = [{ level: "info", title: "ตรวจ headers ไม่สำเร็จ", detail: reason }];
-        renderFindings(output, failed); finishScan("website-headers", failed, target.href);
+        const findings = [{ level: "info", title: "?????????????????????", detail: error.message }];
+        renderFindings(output, findings);
+        finishScan("website-headers", findings, target);
       } finally {
-        window.clearTimeout(timeout); button.disabled = false; button.textContent = "เริ่มตรวจแบบ Passive";
+        button.disabled = false;
+        button.textContent = "???????????? Passive";
       }
     });
 
@@ -1305,85 +1313,8 @@
       }
     });
 
-    document.querySelectorAll(".virus-scan-form").forEach((scanForm) => {
-      scanForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const files = Array.from(form.querySelector('input[type="file"]').files);
-        const output = document.getElementById(form.dataset.results);
-        const button = form.querySelector("button[type=submit]");
-        const mode = form.querySelector('input[type="radio"]:checked').value;
-        if (files.length === 0 || files.length > 10) {
-          renderFindings(output, [{
-            level: "info",
-            title: "จำนวนไฟล์ไม่ถูกต้อง",
-            detail: "เลือกไฟล์อย่างน้อย 1 ไฟล์และไม่เกิน 10 ไฟล์ต่อครั้ง"
-          }]);
-          return;
-        }
-        const tooLarge = files.find((file) => file.size > 20 * 1024 * 1024);
-        if (tooLarge) {
-          renderFindings(output, [{
-            level: "info",
-            title: "ไฟล์มีขนาดเกินกำหนด",
-            detail: tooLarge.name + " มีขนาดเกิน 20 MiB"
-          }]);
-          return;
-        }
-
-        if (!API_BASE) {
-          renderFindings(output, [{ level: "info", title: "ไม่มี Backend สำหรับสแกนไฟล์", detail: "GitHub Pages ให้บริการเฉพาะไฟล์ static ใช้ตัวช่วย Microsoft Defender ในเครื่องเพื่อสแกนโดยไม่อัปโหลดไฟล์" }]);
-          return;
-        }
-
-        button.disabled = true;
-        button.textContent = "กำลังส่งไฟล์เข้าคิว...";
-        renderFindings(output, [{
-          level: "info",
-          title: "กำลังส่งไฟล์เข้าสู่ระบบสแกน",
-          detail: "ไฟล์จะถูกอัปโหลดไปยัง Backend ที่ให้บริการหน้านี้ และไม่ถูกรัน"
-        }]);
-        try {
-          for (const file of files) {
-            const uploadForm = new FormData();
-            uploadForm.append("file", file, file.name);
-            uploadForm.append("mode", mode);
-            uploadForm.append("consent", "true");
-            const response = await fetch(apiUrl("/api/v1/virus-scans"), {
-              method: "POST",
-              body: uploadForm,
-              cache: "no-store"
-            });
-            const payload = await response.json().catch(() => ({}));
-            if (!response.ok) {
-              const detail = payload.detail || "Backend ตอบกลับ HTTP " + response.status;
-              throw new Error(file.name + ": " + detail);
-            }
-            const job = {
-              ...payload.scan,
-              token: payload.access_token,
-              finalized: false,
-              message: "ส่งเข้าคิวแล้ว"
-            };
-            state.virusJobs.set(job.id, job);
-            renderVirusJobs();
-            void pollVirusJob(job);
-          }
-        } catch (error) {
-          renderFindings(output, [{
-            level: "info",
-            title: "ส่งไฟล์เข้าคิวไม่สำเร็จ",
-            detail: error.message + " ตรวจสอบสถานะ Backend/Redis แล้วลองส่งไฟล์ที่ยังไม่สำเร็จใหม่"
-          }]);
-        } finally {
-          button.disabled = false;
-          button.textContent = "ส่งไฟล์เข้าคิวสแกน";
-        }
-      });
-    });
-
     checkBackendHealth();
-    if (API_BASE) window.setInterval(checkBackendHealth, 15000);
+    window.setInterval(checkBackendHealth, 15000);
   </script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
