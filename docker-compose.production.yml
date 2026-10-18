@@ -1,0 +1,26 @@
+services:
+  api:
+    environment:
+      DATABASE_URL: postgresql+psycopg://scanner:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD on the VPS}@db:5432/scanner
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_started
+
+  worker:
+    environment:
+      DATABASE_URL: postgresql+psycopg://scanner:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD on the VPS}@db:5432/scanner
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_started
+
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD on the VPS}

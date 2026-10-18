@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101a2b">
+  <title>วิถีป้องกันรอบด้าน | Security Scanner</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1220;
+      --panel: #111c2e;
+      --panel-2: #17243a;
+      --line: #25344b;
+      --text: #e7eef8;
+      --muted: #91a1b8;
+      --cyan: #40d9c2;
+      --blue: #82aaff;
+      --yellow: #f2c66d;
+      --red: #ff7885;
+      --green: #60d6a8;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: radial-gradient(ellipse at 70% -20%, #1a3150 0, transparent 42%), var(--bg);
+      color: var(--text);
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .layout { min-height: 100vh; display: grid; grid-template-columns: 250px 1fr; }
+    aside {
+      padding: 28px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(10, 17, 30, .88);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin: 2px 8px 38px; }
+    .brand-mark {
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px;
+      color: #061814; background: var(--cyan); font-size: 21px; font-weight: 800;
+    }
+    .brand-name { font-size: 17px; font-weight: 750; letter-spacing: .2px; }
+    .brand-sub { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 500; }
+    .nav-label { margin: 0 10px 10px; color: #71829a; font-size: 10px; font-weight: 700; letter-spacing: 1.4px; }
+    .nav { display: grid; gap: 6px; }
+    .nav button {
+      display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px;
+      border: 1px solid transparent; border-radius: 9px; color: #aab8ca; background: transparent;
+      text-align: left; font-size: 13px;
+    }
+    .nav button:hover, .nav button[aria-current="page"] {
+      border-color: #254250; color: var(--cyan); background: #142a37;
+    }
+    .nav-icon { width: 18px; text-align: center; font-size: 16px; }
+    .scan-icon { display: inline-block; width: 18px; height: 18px; color: var(--cyan); vertical-align: middle; }
+    .scan-icon svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .scan-icon path { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .scan-icon .scan-icon-line { animation: scan-sweep 1.8s ease-in-out infinite; }
+    @keyframes scan-sweep {
+      0%, 100% { transform: translateY(-4px); opacity: .65; }
+      50% { transform: translateY(4px); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .scan-icon .scan-icon-line { animation: none; }
+    }
+    .side-note {
+      margin-top: 38px; padding: 14px; border: 1px solid var(--line); border-radius: 10px;
+      color: var(--muted); font-size: 11px; line-height: 1.65;
+    }
+    .side-note strong { display: block; margin-bottom: 4px; color: var(--yellow); font-size: 12px; }
+    main { width: min(1200px, 100%); margin: 0 auto; padding: 30px 38px 50px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 30px; }
+    .eyebrow { color: var(--cyan); font-size: 10px; font-weight: 700; letter-spacing: 1.8px; }
+    h1 { margin: 7px 0 0; font-size: clamp(24px, 3vw, 32px); letter-spacing: -.5px; }
+    .status-pill {
+      display: flex; align-items: center; gap: 8px; padding: 8px 11px; border: 1px solid var(--line);
+      border-radius: 99px; color: #b9c6d8; background: #101b2b; font-size: 11px; white-space: nowrap;
+    }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px #60d6a866; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .hero {
+      position: relative; overflow: hidden; padding: 26px 28px; margin-bottom: 18px;
+      border: 1px solid #284454; border-radius: 14px;
+      background: linear-gradient(110deg, #132c3b, #142239 68%, #182540);
+    }
+    .hero:after {
+      position: absolute; right: 7%; top: -78px; width: 230px; height: 230px; border: 1px solid #40d9c21c;
+      border-radius: 50%; box-shadow: 0 0 0 28px #40d9c20b, 0 0 0 58px #40d9c208; content: "";
+    }
+    .hero h2 { position: relative; z-index: 1; margin: 0 0 8px; font-size: 20px; }
+    .hero p { position: relative; z-index: 1; max-width: 660px; margin: 0; color: #a6b7ca; font-size: 13px; line-height: 1.7; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .stat, .card { border: 1px solid var(--line); border-radius: 12px; background: rgba(17, 28, 46, .92); }
+    .stat { padding: 16px; }
+    .stat-label { color: var(--muted); font-size: 11px; }
+    .stat-value { margin-top: 8px; font-size: 25px; font-weight: 750; }
+    .stat-value.cyan { color: var(--cyan); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.yellow { color: var(--yellow); }
+    .grid-two { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+    .card { padding: 19px; }
+    .card h2, .card h3 { margin: 0 0 7px; font-size: 15px; }
+    .card .sub { margin: 0 0 16px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    .action {
+      min-height: 112px; padding: 14px; border: 1px solid var(--line); border-radius: 10px;
+      color: var(--text); background: #142137; text-align: left;
+    }
+    .action:hover { border-color: #40d9c26e; background: #172b40; }
+    .action span { display: block; margin-bottom: 12px; color: var(--cyan); font-size: 20px; }
+    .action .scan-icon { width: 24px; height: 24px; margin-bottom: 12px; }
+    .action strong { display: block; margin-bottom: 4px; font-size: 12px; }
+    .action small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .callout {
+      margin: 14px 0; padding: 12px 14px; border: 1px solid #5a4a2b; border-radius: 9px;
+      color: #d4c294; background: #29251b; font-size: 11px; line-height: 1.65;
+    }
+    .callout.info { border-color: #2b4b60; color: #b4d0e2; background: #152837; }
+    .callout.error { border-color: #673a46; color: #ffc0c5; background: #2d1c27; }
+    .form-grid { display: grid; gap: 14px; max-width: 760px; }
+    label { color: #c5d1e0; font-size: 12px; font-weight: 650; }
+    input[type="url"], input[type="text"], textarea {
+      width: 100%; margin-top: 7px; padding: 11px 12px; outline: none;
+      border: 1px solid #31425a; border-radius: 8px; color: var(--text); background: #0c1626;
+    }
+    input:focus, textarea:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px #40d9c21c; }
+    input[type="file"] { display: block; width: 100%; margin-top: 8px; color: var(--muted); font-size: 11px; }
+    textarea { min-height: 170px; resize: vertical; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6; }
+    .checkline { display: flex; align-items: flex-start; gap: 9px; color: #a9b8ca; font-size: 11px; line-height: 1.6; }
+    .checkline input { margin-top: 3px; accent-color: var(--cyan); }
+    .btn {
+      width: fit-content; padding: 10px 16px; border: 1px solid #3bdfc7; border-radius: 8px;
+      color: #071b18; background: var(--cyan); font-size: 12px; font-weight: 750;
+    }
+    .btn:hover { background: #6ae8d5; }
+    .btn:disabled { cursor: wait; opacity: .6; }
+    .btn.secondary { color: #d8e2ef; border-color: #34465d; background: #1a2940; }
+    .results { display: grid; gap: 9px; margin-top: 18px; }
+    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 10px; }
+    .result-head h3 { margin: 0; font-size: 14px; }
+    .finding {
+      padding: 13px 14px; border: 1px solid var(--line); border-left: 3px solid #66778f;
+      border-radius: 8px; background: #101b2b;
+    }
+    .finding.high { border-left-color: var(--red); }
+    .finding.medium { border-left-color: var(--yellow); }
+    .finding.low { border-left-color: var(--blue); }
+    .finding.info { border-left-color: var(--cyan); }
+    .finding h4 { margin: 0 0 5px; font-size: 12px; }
+    .finding p { margin: 0; color: #aab9ca; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+    .tag { color: var(--muted); font-size: 10px; }
+    .empty { padding: 17px; color: var(--muted); border: 1px dashed #324159; border-radius: 8px; font-size: 11px; }
+    .file-list { margin: 7px 0 0; color: var(--muted); font-size: 11px; }
+    .system-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .system-card { padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #101b2b; }
+    .system-card strong { display: block; margin: 9px 0 4px; font-size: 12px; }
+    .system-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .state-label { display: inline-flex; align-items: center; gap: 6px; color: var(--yellow); font-size: 10px; }
+    .state-label:before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
+    .state-label.ready { color: var(--green); }
+    .state-label.disabled { color: #8594a9; }
+    .engine-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .engine-card { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 9px; background: #101b2b; }
+    .engine-card h3 { margin: 0 0 5px; font-size: 12px; }
+    .engine-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 11px 9px; border-bottom: 1px solid var(--line); font-size: 11px; white-space: nowrap; }
+    th { color: var(--muted); font-size: 10px; font-weight: 650; }
+    td { color: #cfdae8; }
+    .state-chip { padding: 4px 8px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font-size: 10px; }
+    .mode-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .mode-option { display: flex; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 9px; background: #101b2b; }
+    .mode-option input { margin-top: 3px; accent-color: var(--cyan); }
+    .mode-option strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 12px; }
+    .mode-option small { display: block; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .scan-job { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 14px; align-items: center; padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: #101b2b; }
+    .scan-job strong { display: block; overflow-wrap: anywhere; font-size: 12px; }
+    .scan-job small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .scan-job .job-state { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
+    .finding .recommendation { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); color: #c6d4e5; }
+    .severity-row { display: grid; grid-template-columns: 85px 1fr 32px; align-items: center; gap: 10px; margin: 12px 0; color: #b8c5d7; font-size: 11px; }
+    .severity-track { height: 7px; overflow: hidden; border-radius: 99px; background: #26354a; }
+    .severity-fill { width: 0; height: 100%; border-radius: inherit; transition: width .25s ease; }
+    .severity-fill.high { background: var(--red); }
+    .severity-fill.medium { background: var(--yellow); }
+    .severity-fill.low { background: var(--green); }
+    .wifi-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 16px 0; }
+    .wifi-metric { padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: #101b2b; }
+    .wifi-metric span { display: block; color: var(--muted); font-size: 10px; }
+    .wifi-metric strong { display: block; margin-top: 7px; color: var(--text); font-size: 16px; overflow-wrap: anywhere; }
+    .wifi-signal-track { height: 8px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: #26354a; }
+    .wifi-signal-fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
+    .wifi-signal-fill.medium { background: var(--yellow); }
+    .wifi-signal-fill.low { background: var(--red); }
+    .scan-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0; }
+    .scan-metric { padding: 13px; border: 1px solid var(--line); border-radius: 9px; background: #101b2b; }
+    .scan-metric span { display: block; color: var(--muted); font-size: 10px; }
+    .scan-metric strong { display: block; margin-top: 7px; color: var(--text); font-size: 16px; overflow-wrap: anywhere; }
+    .command { display: block; margin: 10px 0; padding: 12px; overflow-wrap: anywhere; border: 1px solid var(--line); border-radius: 8px; color: #c7d8ea; background: #0c1626; font: 11px/1.6 Consolas, monospace; }
+    .footer-note { margin-top: 24px; color: #71829a; font-size: 10px; line-height: 1.7; }
+    a { color: var(--blue); }
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { margin: 2px 4px 12px; }
+      .nav-label, .side-note { display: none; }
+      .nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .nav button { justify-content: center; padding: 9px 5px; font-size: 10px; }
+      .nav-icon { display: none; }
+      main { padding: 23px 18px 38px; }
+    }
+    @media (max-width: 620px) {
+      .topbar { align-items: flex-start; }
+      .status-pill { margin-top: 2px; font-size: 0; }
+      .status-dot { width: 9px; height: 9px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .grid-two { grid-template-columns: 1fr; }
+      .quick-actions { grid-template-columns: 1fr; }
+      .mode-options { grid-template-columns: 1fr; }
+      .system-grid, .engine-grid { grid-template-columns: 1fr; }
+      .wifi-summary { grid-template-columns: repeat(2, 1fr); }
+      .scan-summary { grid-template-columns: repeat(2, 1fr); }
+      .action { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <div class="brand-name">วิถีป้องกันรอบด้าน<span class="brand-sub">SECURITY WORKSPACE</span></div>
+      </div>
+      <p class="nav-label">เมนูหลัก</p>
+      <nav class="nav" aria-label="เมนูหลัก">
+        <button type="button" data-view="dashboard" aria-current="page"><span class="nav-icon">▦</span>ภาพรวม</button>
+        <button type="button" data-view="queue"><span class="nav-icon">⇄</span>คิวงาน</button>
+        <button type="button" data-view="reports"><span class="nav-icon">▤</span>รายงาน</button>
+        <button type="button" data-view="engines"><span class="nav-icon">◇</span>Scanner Engines</button>
+        <button type="button" data-view="virus"><span class="nav-icon scan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3M7 7h10v10H7z"/><path class="scan-icon-line" d="M5 12h14"/></svg></span>สแกนไวรัส</button>
+        <button type="button" data-view="website"><span class="nav-icon">⌕</span>ตรวจเว็บไซต์</button>
+        <button type="button" data-view="code"><span class="nav-icon">⌘</span>ตรวจโค้ด</button>
+        <button type="button" data-view="dependencies"><span class="nav-icon">◇</span>ตรวจแพ็กเกจ</button>
+        <button type="button" data-view="wifi"><span class="nav-icon">⌁</span>ตรวจ Wi-Fi</button>
+      </nav>
+      <div class="side-note">
+        <strong>ใช้กับระบบที่ได้รับอนุญาตเท่านั้น</strong>
+        สแกนเฉพาะไฟล์ที่คุณเลือกอัปโหลด ไฟล์จะถูกกักไว้ชั่วคราวและไม่ถูกรันโดยระบบ
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><div class="eyebrow">SECURITY OVERVIEW</div><h1 id="pageTitle">ภาพรวมความปลอดภัย</h1></div>
+        <div class="status-pill"><span class="status-dot" id="backendStatusDot" style="background:var(--yellow);box-shadow:none"></span><span id="backendStatusText">กำลังตรวจสอบ Backend...</span></div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="hero">
+          <h2>ตรวจสุขภาพความปลอดภัยของระบบ</h2>
+          <p>ตรวจ HTTP headers แบบ passive วิเคราะห์ source code ในเครื่อง ตรวจ dependency และสแกนไฟล์ด้วย ClamAV/YARA เมื่อเปิด Backend เลือกการตรวจที่ต้องการเริ่มต้นได้เลย</p>
+        </div>
+        <div class="stats" aria-label="สรุปผลการตรวจ">
+          <div class="stat"><div class="stat-label">จำนวนการตรวจ</div><div class="stat-value cyan" id="statScans">0</div></div>
+          <div class="stat"><div class="stat-label">พบรายการที่ควรตรวจสอบ</div><div class="stat-value yellow" id="statFindings">0</div></div>
+          <div class="stat"><div class="stat-label">ความเสี่ยงสูง</div><div class="stat-value red" id="statHigh">0</div></div>
+          <div class="stat"><div class="stat-label">รายงานล่าสุด</div><div class="stat-value" style="font-size:14px" id="statLast">ยังไม่มี</div></div>
+        </div>
+        <div class="card" style="margin-bottom:14px">
+          <h2>ระดับความรุนแรงสะสม</h2>
+          <p class="sub">นับจากผลการตรวจในแท็บนี้เท่านั้น</p>
+          <div class="severity-row"><span>High</span><div class="severity-track"><div id="barHigh" class="severity-fill high"></div></div><strong id="countHigh">0</strong></div>
+          <div class="severity-row"><span>Medium</span><div class="severity-track"><div id="barMedium" class="severity-fill medium"></div></div><strong id="countMedium">0</strong></div>
+          <div class="severity-row"><span>Low</span><div class="severity-track"><div id="barLow" class="severity-fill low"></div></div><strong id="countLow">0</strong></div>
+        </div>
+        <div class="grid-two">
+          <div class="card">
+            <h2>เริ่มการตรวจ</h2>
+            <p class="sub">เลือกชนิดการตรวจให้เหมาะกับสิ่งที่ต้องการประเมิน</p>
+            <div class="quick-actions">
+              <button class="action" type="button" data-go="website"><span>⌕</span><strong>เว็บไซต์</strong><small>ตรวจ HTTP security headers</small></button>
+              <button class="action" type="button" data-go="code"><span>⌘</span><strong>ซอร์สโค้ด</strong><small>วิเคราะห์ไฟล์ในเครื่อง</small></button>
+              <button class="action" type="button" data-go="dependencies"><span>◇</span><strong>แพ็กเกจ</strong><small>ตรวจ CVE ผ่านฐานข้อมูล OSV</small></button>
+              <button class="action" type="button" data-go="virus"><span class="scan-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3M7 7h10v10H7z"/><path class="scan-icon-line" d="M5 12h14"/></svg></span><strong>สแกนไวรัส</strong><small>ClamAV ปกติ / ลึกพร้อม YARA — เฉพาะไฟล์ที่เลือก</small></button>
+            </div>
+          </div>
+          <div class="card">
+            <h2>ข้อจำกัดที่ควรรู้</h2>
+            <p class="sub">การตรวจ headers และ source code ทำใน browser; สแกนไฟล์ไวรัสต้องเปิด FastAPI/Celery/Redis/ClamAV ผ่าน Docker Compose เว็บนี้ไม่สามารถเข้าถึงไฟล์ทั้งหมดหรือแอปที่ติดตั้งในเครื่องได้</p>
+            <div class="callout info">การตรวจเว็บไซต์ใช้คำขอ HEAD หนึ่งครั้งเท่านั้น และอาจอ่าน headers ไม่ได้หากเว็บไม่เปิด CORS ส่วนรายละเอียดใบรับรอง TLS ต้องตรวจจาก backend</div>
+            <div class="callout">ข้อมูล dependency (ชื่อและเวอร์ชันเท่านั้น) ส่งไปยัง OSV; source code วิเคราะห์ใน browser แต่ไฟล์สแกนไวรัสจะถูกอัปโหลดไปยัง backend เพื่อกักไว้ชั่วคราว</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>สแกนไฟล์จากภาพรวม</h2>
+          <p class="sub">เลือกไฟล์และเริ่มสแกนด้วย ClamAV ได้จากหน้านี้เลย หรือเลือกโหมดเชิงลึกเพื่อเพิ่ม YARA</p>
+          <div class="callout">สแกนได้เฉพาะไฟล์ที่เลือกและต้องเชื่อมต่อ Backend/worker ที่พร้อมใช้งาน ไฟล์จะถูกส่งไปกักไว้ชั่วคราวบนเซิร์ฟเวอร์และไม่ถูกรัน</div>
+          <form id="dashboardVirusScanForm" class="form-grid virus-scan-form" data-results="dashboardVirusScanResults">
+            <label for="dashboardVirusFiles">เลือกไฟล์ (สูงสุด 10 ไฟล์, ไฟล์ละไม่เกิน 20 MiB)
+              <input type="file" id="dashboardVirusFiles" multiple required>
+            </label>
+            <div>
+              <label>โหมดการตรวจ</label>
+              <div class="mode-options" style="margin-top:8px">
+                <label class="mode-option"><input type="radio" name="dashboardVirusMode" value="standard" checked><span><strong>สแกนปกติ</strong><small>ClamAV signature scan รวมการตรวจ archive ตามขีดจำกัดของ engine</small></span></label>
+                <label class="mode-option"><input type="radio" name="dashboardVirusMode" value="deep"><span><strong>สแกนเชิงลึก</strong><small>ClamAV + YARA heuristic scan; ใช้เวลามากขึ้นและอาจแจ้งเตือนผิดพลาด</small></span></label>
+              </div>
+            </div>
+            <label class="checkline"><input type="checkbox" required><span>ฉันมีสิทธิ์ส่งไฟล์นี้ให้ระบบตรวจ และยินยอมให้จัดเก็บชั่วคราวบนเซิร์ฟเวอร์ระหว่างสแกน</span></label>
+            <button class="btn" type="submit">ส่งไฟล์เข้าคิวสแกน</button>
+          </form>
+          <div id="dashboardVirusScanJobs" class="results" aria-live="polite"><div class="empty">ยังไม่มีงานสแกน</div></div>
+          <div id="dashboardVirusScanResults" class="results" aria-live="polite"><div class="empty">ผลและคำแนะนำจะแสดงหลัง worker สแกนเสร็จ</div></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>สถานะองค์ประกอบระบบ</h2>
+          <p class="sub">ภาพรวมตามสถาปัตยกรรม Frontend → Backend API → Task Queue → Scanning Engines</p>
+          <div class="system-grid">
+            <div class="system-card"><span class="state-label ready">ทำงานในเบราว์เซอร์</span><strong>Frontend</strong><p>Dashboard และตัวตรวจในเครื่อง ใช้ได้ในหน้านี้</p></div>
+            <div class="system-card"><span class="state-label" id="apiHealth">กำลังตรวจสอบ</span><strong>Backend API</strong><p>FastAPI รับไฟล์และแสดงสถานะงานสแกน</p></div>
+            <div class="system-card"><span class="state-label" id="queueHealth">กำลังตรวจสอบ</span><strong>Task Queue</strong><p>Celery/Redis จัดคิวตรวจไฟล์เบื้องหลัง</p></div>
+            <div class="system-card"><span class="state-label" id="dbHealth">กำลังตรวจสอบ</span><strong>Database</strong><p>PostgreSQL เก็บ metadata และผลสแกน</p></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="result-head"><h3>Scanner Engines</h3><button class="btn secondary" type="button" data-go="engines">ดูรายละเอียด</button></div>
+          <p class="sub">แสดงการเชื่อมต่อที่มีจริงและ integration ที่ยังไม่ได้เปิดใช้งาน</p>
+          <div class="engine-grid">
+            <div class="engine-card"><div><h3>HTTP Headers</h3><p>ตรวจแบบ passive จาก browser</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>Source Code Rules</h3><p>วิเคราะห์ไฟล์ภายใน browser</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>OSV Dependency Check</h3><p>ค้นหา advisory ด้วย OSV API</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>ClamAV / YARA</h3><p>สแกนไฟล์อัปโหลดใน quarantine ผ่าน backend และ worker</p></div><span class="state-label" id="virusEngineHealth">กำลังตรวจสอบ</span></div>
+            <div class="engine-card"><div><h3>ZAP / Nuclei / Nmap / WPScan</h3><p>ยังไม่ได้เชื่อมต่อ และไม่อยู่ในขอบเขตการสแกนนี้</p></div><span class="state-label disabled">ปิดใช้งาน</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="result-head"><h3>ผลการตรวจล่าสุด</h3><button class="btn secondary" type="button" id="exportButton">ส่งออกรายงาน JSON</button></div>
+          <div id="latestResults" class="results"><div class="empty">ยังไม่มีผลการตรวจ เริ่มตรวจจากเมนูด้านบนได้เลย</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-queue">
+        <div class="card">
+          <h2>คิวงานสแกน</h2>
+          <p class="sub">ส่วนแสดงสถานะการทำงานเบื้องหลังตามแบบระบบ Celery + Redis</p>
+          <div class="callout">คิวด้านล่างแสดงงานสแกนไฟล์ที่เริ่มจากเบราว์เซอร์นี้เท่านั้น สถานะจริงมาจาก API/worker; งานอื่นจะไม่แสดง</div>
+          <div class="stats" style="margin-top:18px">
+            <div class="stat"><div class="stat-label">Queued</div><div class="stat-value" id="virusQueuedCount">0</div></div>
+            <div class="stat"><div class="stat-label">กำลังทำงาน</div><div class="stat-value" id="virusRunningCount">0</div></div>
+            <div class="stat"><div class="stat-label">เสร็จสิ้น</div><div class="stat-value" id="virusCompletedCount">0</div></div>
+            <div class="stat"><div class="stat-label">Worker</div><div class="stat-value" style="font-size:15px;color:var(--yellow)" id="virusWorkerState">กำลังตรวจสอบ</div></div>
+          </div>
+          <h3 style="margin:20px 0 10px;font-size:13px">งานในคิว</h3>
+          <div id="queueVirusJobs" class="results"><div class="empty">ยังไม่มีงานสแกนไฟล์</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-reports">
+        <div class="card">
+          <div class="result-head"><div><h2>ประวัติและรายงาน</h2><p class="sub" style="margin:5px 0 0">รายการตรวจในแท็บนี้เท่านั้น ไม่ได้บันทึกลงฐานข้อมูล</p></div><button class="btn secondary" type="button" id="exportHistoryButton">ส่งออกผลล่าสุด</button></div>
+          <div id="historyTable" class="empty">ยังไม่มีประวัติการตรวจ</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>รายละเอียดผลล่าสุด</h2>
+          <div id="reportResults" class="results"><div class="empty">เลือกตรวจจากเมนูด้านซ้ายเพื่อสร้างรายงาน</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-engines">
+        <div class="card">
+          <h2>Scanning Engines และการเชื่อมต่อ</h2>
+          <p class="sub">สถานะตามความสามารถที่มีจริงในไฟล์ต้นแบบ ไม่มีการจำลองสถานะ backend ว่าเชื่อมต่อแล้ว</p>
+          <div class="engine-grid">
+            <div class="engine-card"><div><h3>HTTP Headers</h3><p>คำขอ HEAD จาก browser หนึ่งครั้ง ตรวจ security headers ที่ CORS อนุญาตให้อ่าน</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>TLS Certificate</h3><p>browser ตรวจ TLS ขณะเชื่อมต่อ แต่หน้าเว็บนี้อ่าน chain และวันหมดอายุไม่ได้ ต้องเพิ่ม backend checker</p></div><span class="state-label disabled">ต้องมี Backend</span></div>
+            <div class="engine-card"><div><h3>Source Code</h3><p>กฎตรวจพื้นฐานทำงานใน browser; ไม่ execute และไม่อัปโหลด source</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>Dependency / OSV</h3><p>ส่งชื่อแพ็กเกจและเวอร์ชันที่แน่นอนไปยัง OSV API</p></div><span class="state-label ready">พร้อม</span></div>
+            <div class="engine-card"><div><h3>OWASP ZAP</h3><p>ยังไม่ติดตั้งหรือเชื่อมต่อ; active scan ไม่อยู่ในขอบเขตนี้</p></div><span class="state-label disabled">ยังไม่เชื่อมต่อ</span></div>
+            <div class="engine-card"><div><h3>Nuclei / Nmap / WPScan</h3><p>ยังไม่ติดตั้งหรือเชื่อมต่อ; ไม่เปิดการสแกนเชิงรุกในต้นแบบนี้</p></div><span class="state-label disabled">ยังไม่เชื่อมต่อ</span></div>
+          </div>
+          <div class="callout info">หากพัฒนาต่อ ควรให้ Backend ตรวจ ownership/allowlist และป้องกัน SSRF ก่อนส่งงานเข้า queue หรือเรียก scanner ใด ๆ</div>
+        </div>
+      </section>
+
+      <section class="view" id="view-website">
+        <div class="card">
+          <h2>ตรวจการตั้งค่าเว็บไซต์</h2>
+          <p class="sub">ส่ง HTTP HEAD request เพียงครั้งเดียว เพื่อตรวจ security headers ที่ browser อ่านได้ ไม่มีการ crawl หรือทดสอบช่องโหว่เชิงโจมตี</p>
+          <div class="callout">ต้องได้รับอนุญาตจากเจ้าของระบบก่อนใช้งาน Browser อาจปฏิเสธการอ่านผลจากเว็บไซต์ที่ไม่เปิด CORS และไม่สามารถตรวจคะแนน/รายละเอียดใบรับรอง TLS ได้</div>
+          <form id="websiteForm" class="form-grid">
+            <label for="websiteUrl">URL ของเว็บไซต์ (แนะนำ HTTPS)
+              <input type="url" id="websiteUrl" placeholder="https://example.com" autocomplete="url" required>
+            </label>
+            <label class="checkline"><input type="checkbox" id="websiteConsent" required><span>ฉันเป็นเจ้าของเว็บไซต์นี้หรือได้รับอนุญาตให้ตรวจสอบ และยินยอมให้ส่งคำขอ HEAD หนึ่งครั้ง</span></label>
+            <button class="btn" type="submit">เริ่มตรวจแบบ Passive</button>
+          </form>
+          <div id="websiteResults" class="results" aria-live="polite"><div class="empty">ผลการตรวจจะแสดงที่นี่</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-code">
+        <div class="card">
+          <h2>วิเคราะห์ซอร์สโค้ด</h2>
+          <p class="sub">ตรวจสัญญาณเสี่ยงทั่วไปในไฟล์ที่เลือกหรือโค้ดที่วาง โดยประมวลผลทั้งหมดใน browser ของคุณ</p>
+          <div class="callout info">การวิเคราะห์นี้เป็นกฎพื้นฐาน ไม่ใช่ SAST เต็มรูปแบบ ผลที่พบเป็นเพียงจุดเริ่มต้นสำหรับการตรวจสอบด้วยคน</div>
+          <form id="codeForm" class="form-grid">
+            <label for="codeFiles">เลือกไฟล์โค้ด (สูงสุด 15 ไฟล์, 1 MB ต่อไฟล์)
+              <input type="file" id="codeFiles" multiple accept=".js,.jsx,.ts,.tsx,.py,.php,.java,.html,.vue,.sql,.go,.rb,.cs,.json">
+              <div id="fileList" class="file-list"></div>
+            </label>
+            <label for="codeInput">หรือวางโค้ด
+              <textarea id="codeInput" placeholder="วางโค้ดที่ต้องการวิเคราะห์..."></textarea>
+            </label>
+            <button class="btn" type="submit">วิเคราะห์ในเครื่อง</button>
+          </form>
+          <div id="codeResults" class="results" aria-live="polite"><div class="empty">ผลการวิเคราะห์จะแสดงที่นี่</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-dependencies">
+        <div class="card">
+          <h2>ตรวจสอบ dependency</h2>
+          <p class="sub">อัปโหลด package-lock.json หรือ package.json เพื่อตรวจหาช่องโหว่ที่มีบันทึกใน OSV (Open Source Vulnerabilities)</p>
+          <div class="callout">จะส่งเฉพาะชื่อแพ็กเกจและเวอร์ชันไปยัง <a href="https://osv.dev/" target="_blank" rel="noopener noreferrer">OSV</a> เพื่อค้นหาข้อมูลช่องโหว่ ไม่ส่งไฟล์หรือ source code ทั้งหมด ช่วงเวอร์ชัน เช่น ^1.2.3 ต้องใช้ package-lock.json เพื่อให้ตรวจได้แม่นยำ</div>
+          <form id="dependencyForm" class="form-grid">
+            <label for="dependencyFiles">ไฟล์ package.json หรือ package-lock.json
+              <input type="file" id="dependencyFiles" accept=".json,application/json" multiple required>
+            </label>
+            <label class="checkline"><input type="checkbox" id="dependencyConsent" required><span>ฉันยินยอมให้ส่งชื่อและเวอร์ชัน dependency ไปยัง OSV API เพื่อค้นหาช่องโหว่</span></label>
+            <button class="btn" type="submit">ตรวจสอบกับ OSV</button>
+          </form>
+          <div id="dependencyResults" class="results" aria-live="polite"><div class="empty">ผลการตรวจจะแสดงที่นี่</div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-virus">
+        <div class="card">
+          <h2>สแกนในเครื่อง (ไม่อัปโหลดไฟล์)</h2>
+          <p class="sub">ใช้ Microsoft Defender Antivirus บน Windows ตรวจไฟล์ที่คุณเลือก โดยไฟล์ต้นฉบับไม่ถูกส่งเข้าเว็บไซต์หรือ Backend</p>
+          <div class="callout info">ตัวช่วยทำงานบนเครื่อง Windows ของคุณเอง ใช้ได้เมื่อ Microsoft Defender Antivirus เปิดใช้งานอยู่ ตัวช่วยจะไม่ส่งไฟล์หรือ path ไปยังเซิร์ฟเวอร์ แต่ Defender อาจกักกันหรือลบภัยคุกคามตามการตั้งค่าของ Windows</div>
+          <ol class="sub">
+            <li><a href="/virus-scan.ps1">ดาวน์โหลดตัวช่วยสแกนไวรัสในเครื่อง</a></li>
+            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง จากนั้นเลือกไฟล์ในหน้าต่างที่เปิดขึ้น</li>
+            <li>เลือกไฟล์รายงานที่ตัวช่วยสร้าง แล้วกดวิเคราะห์เพื่อดูจำนวนไฟล์ ผลตรวจพบ และไฟล์ที่สแกนไม่สำเร็จ</li>
+          </ol>
+          <code class="command">powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\virus-scan.ps1"</code>
+          <form id="localVirusReportForm" class="form-grid">
+            <label for="localVirusReportFile">รายงานจาก Microsoft Defender
+              <input type="file" id="localVirusReportFile" accept=".json,application/json" required>
+            </label>
+            <button class="btn" type="submit">แสดงผลสแกนในเครื่อง</button>
+          </form>
+          <div id="localVirusSummary" class="scan-summary" hidden>
+            <div class="scan-metric"><span>ไฟล์ที่เลือก</span><strong id="localVirusFileCount">0</strong></div>
+            <div class="scan-metric"><span>สแกนสำเร็จ</span><strong id="localVirusCompletedCount">0</strong></div>
+            <div class="scan-metric"><span>สแกนไม่สำเร็จ</span><strong id="localVirusFailedCount">0</strong></div>
+            <div class="scan-metric"><span>รายการตรวจพบ</span><strong id="localVirusThreatCount">0</strong></div>
+            <div class="scan-metric"><span>ความเสี่ยงสูง</span><strong id="localVirusHighCount">0</strong></div>
+            <div class="scan-metric"><span>ความเสี่ยงปานกลาง</span><strong id="localVirusMediumCount">0</strong></div>
+            <div class="scan-metric"><span>ความเสี่ยงต่ำ</span><strong id="localVirusLowCount">0</strong></div>
+          </div>
+          <div id="localVirusScanResults" class="results" aria-live="polite"><div class="empty">ผลการสแกนในเครื่องจะแสดงที่นี่</div></div>
+        </div>
+        <div class="card">
+          <h2>สแกนไวรัสและไฟล์ต้องสงสัย</h2>
+          <p class="sub">ทางเลือกเพิ่มเติม: ส่งไฟล์ไปให้ ClamAV/YARA ตรวจผ่าน Backend ซึ่งจะอัปโหลดไฟล์ไปกักไว้ชั่วคราวบนเซิร์ฟเวอร์</p>
+          <div class="callout">ถ้าไม่ต้องการอัปโหลดไฟล์ ให้ใช้ส่วน “สแกนในเครื่อง” ด้านบนแทน การสแกนผ่าน Backend ด้านล่างเหมาะเมื่อคุณยินยอมส่งไฟล์ไปตรวจและมีสิทธิ์ในไฟล์นั้น</div>
+          <form id="virusScanForm" class="form-grid virus-scan-form" data-results="virusScanResults">
+            <label for="virusFiles">เลือกไฟล์ (สูงสุด 10 ไฟล์, ไฟล์ละไม่เกิน 20 MiB)
+              <input type="file" id="virusFiles" multiple required>
+            </label>
+            <div>
+              <label>โหมดการตรวจ</label>
+              <div class="mode-options" style="margin-top:8px">
+                <label class="mode-option"><input type="radio" name="virusMode" value="standard" checked><span><strong>สแกนปกติ</strong><small>ClamAV signature scan รวมการตรวจ archive ตามขีดจำกัดของ engine</small></span></label>
+                <label class="mode-option"><input type="radio" name="virusMode" value="deep"><span><strong>สแกนเชิงลึก</strong><small>ClamAV + YARA heuristic scan; ใช้เวลามากขึ้นและอาจแจ้งเตือนผิดพลาด</small></span></label>
+              </div>
+            </div>
+            <label class="checkline"><input type="checkbox" id="virusConsent" required><span>ฉันมีสิทธิ์ส่งไฟล์นี้ให้ระบบตรวจ และยินยอมให้จัดเก็บชั่วคราวบนเซิร์ฟเวอร์ระหว่างสแกน</span></label>
+            <button class="btn" type="submit">ส่งไฟล์เข้าคิวสแกน</button>
+          </form>
+          <div id="virusScanJobs" class="results" aria-live="polite"><div class="empty">ยังไม่มีงานสแกน</div></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>ผลการตรวจและแนวทางแก้ไข</h2>
+          <p class="sub">คำแนะนำช่วยวางขั้นตอนตอบสนอง ไม่ได้ลบหรือกักกันไฟล์ต้นฉบับให้อัตโนมัติ</p>
+          <div id="virusScanResults" class="results" aria-live="polite"><div class="empty">ผลและคำแนะนำจะแสดงหลัง worker สแกนเสร็จ</div></div>
+        </div>
+      </section>
+      <section class="view" id="view-wifi">
+        <div class="card">
+          <h2>ตรวจสอบ Wi-Fi ที่เชื่อมต่ออยู่</h2>
+          <p class="sub">ตัวช่วย Windows อ่านชื่อเครือข่ายที่เชื่อมต่อ, คุณภาพสัญญาณ และชนิดการยืนยันตัวตน/การเข้ารหัสจาก Native Wi-Fi API แล้วบันทึกรายงานไว้ในเครื่อง</p>
+          <div class="callout info">เว็บไม่สามารถอ่านข้อมูล Wi-Fi จากเบราว์เซอร์ได้โดยตรง จึงต้องดาวน์โหลดและเรียกใช้ตัวช่วย Windows ด้วยตนเอง การตรวจนี้อ่านเฉพาะเครือข่ายที่เชื่อมต่ออยู่ ไม่สแกนเครือข่ายรอบข้าง และไม่ส่งรายงานไปยังเซิร์ฟเวอร์</div>
+          <ol class="sub">
+            <li><a href="/wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
+            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง (เป็นการอนุญาตเฉพาะการเรียกครั้งนี้) ระบบจะสร้าง <code>wifi-scan.json</code> บน Desktop</li>
+            <li>เลือกไฟล์รายงานด้านล่างเพื่อแสดงระดับสัญญาณและประเมินความเสี่ยง</li>
+          </ol>
+          <code class="command">powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\wifi-scan.ps1"</code>
+          <div class="callout">ผลประเมินดูเฉพาะการตั้งค่าการยืนยันตัวตน/การเข้ารหัสที่ Windows รายงาน ไม่ใช่การยืนยันว่าเครือข่ายปลอดภัยทั้งหมด ความแข็งแรงรหัสผ่าน, WPS, firmware, การตั้งค่า router และอุปกรณ์อื่นในเครือข่ายตรวจไม่ได้จากเครื่องลูกข่าย</div>
+          <form id="wifiScanForm" class="form-grid">
+            <label for="wifiReportFile">รายงานจากตัวช่วย Windows
+              <input type="file" id="wifiReportFile" accept=".json,application/json" required>
+            </label>
+            <button class="btn" type="submit">วิเคราะห์รายงาน Wi-Fi</button>
+          </form>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>ผลการตรวจ</h2>
+          <p class="sub">จำนวนความเสี่ยงคือจำนวนประเด็นที่ตรงกับกฎตรวจ ไม่ใช่เปอร์เซ็นต์โอกาสถูกโจมตี</p>
+          <div id="wifiSummary" class="wifi-summary" hidden>
+            <div class="wifi-metric"><span>สถานะความปลอดภัย</span><strong id="wifiSecurityStatus"></strong></div>
+            <div class="wifi-metric"><span>เครือข่ายที่เชื่อมต่อ</span><strong id="wifiSsid"></strong></div>
+            <div class="wifi-metric"><span>คุณภาพสัญญาณ</span><strong id="wifiSignalText"></strong><div class="wifi-signal-track"><div id="wifiSignalBar" class="wifi-signal-fill"></div></div></div>
+            <div class="wifi-metric"><span>ความเสี่ยงสูง</span><strong id="wifiHighCount">0</strong></div>
+            <div class="wifi-metric"><span>ความเสี่ยงปานกลาง</span><strong id="wifiMediumCount">0</strong></div>
+            <div class="wifi-metric"><span>ความเสี่ยงต่ำ</span><strong id="wifiLowCount">0</strong></div>
+            <div class="wifi-metric"><span>การยืนยันตัวตน</span><strong id="wifiAuthentication"></strong></div>
+            <div class="wifi-metric"><span>การเข้ารหัส</span><strong id="wifiCipher"></strong></div>
+            <div class="wifi-metric"><span>เวลาอ่านข้อมูล</span><strong id="wifiCapturedAt"></strong></div>
+          </div>
+          <div id="wifiResults" class="results" aria-live="polite"><div class="empty">เลือกและวิเคราะห์รายงานจากตัวช่วย Windows เพื่อดูผล</div></div>
+        </div>
+      </section>
+      <p class="footer-note">เครื่องมือนี้ช่วยคัดกรองเบื้องต้น ไม่รับประกันว่าจะพบช่องโหว่ทั้งหมด และผล "ไม่พบ" ไม่ได้ยืนยันว่าระบบปลอดภัย ควรใช้เครื่องมือและผู้เชี่ยวชาญเพิ่มเติมก่อนใช้งานจริง การใช้งานหน้านี้ส่งข้อมูลการเข้าชมพื้นฐานไปยัง Firebase Analytics; ไม่ส่งไฟล์ที่เลือกตรวจ</p>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    const state = {
+      scans: 0,
+      findings: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      last: null,
+      history: [],
+      virusJobs: new Map()
+    };
+    const titles = {
+      dashboard: "ภาพรวมความปลอดภัย",
+      queue: "คิวงานสแกน",
+      reports: "ประวัติและรายงาน",
+      engines: "Scanning Engines",
+      virus: "สแกนไวรัส",
+      wifi: "ตรวจสอบ Wi-Fi",
+      website: "ตรวจการตั้งค่าเว็บไซต์",
+      code: "วิเคราะห์ซอร์สโค้ด",
+      dependencies: "ตรวจสอบ Dependency"
+    };
+    const navButtons = document.querySelectorAll("[data-view]");
+
+    function showView(name) {
+      document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === "view-" + name));
+      navButtons.forEach((button) => {
+        if (button.dataset.view === name) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      document.getElementById("pageTitle").textContent = titles[name];
+    }
+    navButtons.forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
+    document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
+
+    document.getElementById("wifiScanForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const output = document.getElementById("wifiResults");
+      const summary = document.getElementById("wifiSummary");
+      const file = document.getElementById("wifiReportFile").files[0];
+      if (!file) return;
+
+      try {
+        if (file.size > 64 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด");
+        const report = JSON.parse(await file.text());
+        if (!report || typeof report !== "object" || Array.isArray(report)) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
+        }
+        const signal = report.signalQualityPercent;
+        if (
+          report.schemaVersion !== 1 ||
+          typeof report.ssid !== "string" ||
+          !report.ssid.trim() ||
+          typeof report.authentication !== "string" ||
+          typeof report.cipher !== "string" ||
+          typeof report.securityEnabled !== "boolean" ||
+          !Number.isInteger(signal) ||
+          signal < 0 ||
+          signal > 100 ||
+          typeof report.capturedAtUtc !== "string" ||
+          Number.isNaN(Date.parse(report.capturedAtUtc))
+        ) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
+        }
+
+        const authentication = report.authentication.toUpperCase();
+        const cipher = report.cipher.toUpperCase();
+        const findings = [];
+        const isOpen = !report.securityEnabled || authentication === "OPEN" || cipher === "NONE";
+        const isLegacy = authentication === "SHARED" ||
+          authentication === "WPA-NONE" ||
+          cipher.startsWith("WEP");
+        if (isOpen) {
+          findings.push({
+            level: "high",
+            title: "เครือข่ายเปิดหรือไม่เข้ารหัส",
+            detail: "ข้อมูลระบุว่าไม่มีการป้องกันระดับ Wi-Fi เพียงพอ ผู้อื่นในระยะสัญญาณอาจดักอ่านหรือปลอมแปลงการเชื่อมต่อได้ ควรตั้งค่า WPA2-AES หรือ WPA3 ที่เราเตอร์"
+          });
+        } else if (isLegacy) {
+          findings.push({
+            level: "high",
+            title: "พบการยืนยันตัวตน/การเข้ารหัสแบบเก่า",
+            detail: "Shared Key, WPA-NONE หรือ WEP มีความปลอดภัยไม่เพียงพอ ควรเปลี่ยนเป็น WPA2-AES หรือ WPA3"
+          });
+        }
+
+        if (!isOpen && !isLegacy) {
+          if (authentication === "WPA" || authentication === "WPA-PSK") {
+            findings.push({
+              level: "medium",
+              title: "ใช้ WPA รุ่นเก่า",
+              detail: "WPA เดิมมีข้อจำกัดด้านความปลอดภัย ควรเปลี่ยนการตั้งค่าเราเตอร์เป็น WPA2-AES หรือ WPA3"
+            });
+          }
+          if (cipher === "TKIP") {
+            findings.push({
+              level: "medium",
+              title: "พบการเข้ารหัส TKIP",
+              detail: "TKIP เป็นวิธีเข้ารหัสรุ่นเก่าที่ไม่แนะนำ ควรใช้ AES/CCMP หรือ GCMP"
+            });
+          }
+        }
+
+        const recognizedAuthentication = [
+          "OPEN",
+          "SHARED",
+          "WPA",
+          "WPA-PSK",
+          "WPA-NONE",
+          "WPA2",
+          "WPA2-PSK",
+          "WPA3",
+          "WPA3-SAE",
+          "WPA3-ENT",
+          "WPA3-ENT-192"
+        ].includes(authentication);
+        const recognizedCipher = [
+          "NONE",
+          "WEP40",
+          "WEP104",
+          "TKIP",
+          "AES-CCMP",
+          "GCMP",
+          "GCMP-256",
+          "CCMP-256",
+          "BIP",
+          "BIP-GMAC-128",
+          "BIP-GMAC-256",
+          "BIP-CMAC-256"
+        ].includes(cipher);
+        const unknownSecurity = authentication.startsWith("UNKNOWN") ||
+          cipher.startsWith("UNKNOWN") ||
+          !recognizedAuthentication ||
+          !recognizedCipher;
+        if (unknownSecurity) {
+          findings.push({
+            level: "info",
+            title: "ข้อมูลความปลอดภัยบางส่วนยังประเมินไม่ได้",
+            detail: "Windows รายงานชนิดการยืนยันตัวตนหรือการเข้ารหัสที่เครื่องมือนี้ไม่รู้จัก จึงไม่สรุปว่าเครือข่ายปลอดภัย"
+          });
+        } else if (!isOpen && !isLegacy && findings.length === 0) {
+          findings.push({
+            level: "info",
+            title: "ไม่พบสัญญาณการตั้งค่าล้าสมัยจากข้อมูลที่อ่านได้",
+            detail: "พบการยืนยันตัวตนและการเข้ารหัสที่รองรับ ไม่ใช่การรับรองความปลอดภัยทั้งหมดของเครือข่าย"
+          });
+        }
+
+        let signalLabel = "สัญญาณอ่อน";
+        let signalClass = "low";
+        if (signal >= 80) {
+          signalLabel = "สัญญาณดีมาก";
+          signalClass = "";
+        } else if (signal >= 60) {
+          signalLabel = "สัญญาณดี";
+          signalClass = "";
+        } else if (signal >= 40) {
+          signalLabel = "สัญญาณปานกลาง";
+          signalClass = "medium";
+        }
+        findings.push({
+          level: "info",
+          title: signalLabel + " (" + signal + "%)",
+          detail: "เปอร์เซ็นต์นี้เป็นคุณภาพสัญญาณที่ Windows รายงาน ไม่ใช่ความเสี่ยงด้านความปลอดภัย สัญญาณอ่อนอาจทำให้การเชื่อมต่อไม่เสถียร"
+        });
+
+        const highCount = findings.filter((finding) => finding.level === "high").length;
+        const mediumCount = findings.filter((finding) => finding.level === "medium").length;
+        const lowCount = findings.filter((finding) => finding.level === "low").length;
+        let securityStatus = "ไม่พบปัญหาจากค่าที่อ่านได้";
+        if (highCount > 0) securityStatus = "ความเสี่ยงสูง";
+        else if (mediumCount > 0) securityStatus = "ความเสี่ยงปานกลาง";
+        else if (unknownSecurity) securityStatus = "ข้อมูลไม่พอสรุป";
+
+        document.getElementById("wifiSecurityStatus").textContent = securityStatus;
+        document.getElementById("wifiSsid").textContent = report.ssid;
+        document.getElementById("wifiSignalText").textContent = signalLabel + " · " + signal + "%";
+        const signalBar = document.getElementById("wifiSignalBar");
+        signalBar.style.width = signal + "%";
+        signalBar.className = "wifi-signal-fill " + signalClass;
+        document.getElementById("wifiHighCount").textContent = String(highCount);
+        document.getElementById("wifiMediumCount").textContent = String(mediumCount);
+        document.getElementById("wifiLowCount").textContent = String(lowCount);
+        document.getElementById("wifiAuthentication").textContent = report.authentication;
+        document.getElementById("wifiCipher").textContent = report.cipher;
+        document.getElementById("wifiCapturedAt").textContent = new Date(report.capturedAtUtc).toLocaleString("th-TH");
+        summary.hidden = false;
+        renderFindings(output, findings);
+      } catch (error) {
+        summary.hidden = true;
+        renderFindings(output, [{
+          level: "info",
+          title: "อ่านรายงาน Wi-Fi ไม่สำเร็จ",
+          detail: error instanceof SyntaxError
+            ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก wifi-scan.json ที่สร้างจากตัวช่วย"
+            : error.message
+        }]);
+      }
+    });
+
+    document.getElementById("localVirusReportForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const output = document.getElementById("localVirusScanResults");
+      const summary = document.getElementById("localVirusSummary");
+      const file = document.getElementById("localVirusReportFile").files[0];
+      if (!file) return;
+
+      try {
+        if (file.size > 1024 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด");
+        const report = JSON.parse(await file.text());
+        if (!report || typeof report !== "object" || Array.isArray(report)) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Microsoft Defender");
+        }
+        if (
+          report.schemaVersion !== 1 ||
+          report.engine !== "Microsoft Defender" ||
+          !Array.isArray(report.files) ||
+          report.files.length === 0 ||
+          !Array.isArray(report.threats) ||
+          !Number.isInteger(report.threatDetectionCount) ||
+          report.threatDetectionCount < 0 ||
+          typeof report.scanStartedAtUtc !== "string" ||
+          Number.isNaN(Date.parse(report.scanStartedAtUtc)) ||
+          typeof report.scanFinishedAtUtc !== "string" ||
+          Number.isNaN(Date.parse(report.scanFinishedAtUtc))
+        ) {
+          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Microsoft Defender");
+        }
+        const validFiles = report.files.every((item) =>
+          item &&
+          typeof item.fileName === "string" &&
+          (item.status === "completed" || item.status === "failed") &&
+          Number.isFinite(item.sizeBytes) &&
+          item.sizeBytes >= 0
+        );
+        const validThreats = report.threats.every((threat) =>
+          threat &&
+          typeof threat.name === "string" &&
+          ["high", "medium", "low", "info"].includes(threat.severity)
+        );
+        if (!validFiles || !validThreats || report.threats.length > report.threatDetectionCount) {
+          throw new Error("ข้อมูลผลการตรวจในรายงานไม่ถูกต้อง");
+        }
+
+        const completed = report.files.filter((item) => item.status === "completed").length;
+        const failedFiles = report.files.filter((item) => item.status === "failed");
+        const findings = [];
+        report.threats.forEach((threat) => {
+          findings.push({
+            level: threat.severity,
+            title: "Microsoft Defender ตรวจพบ: " + threat.name,
+            detail: "พบรายการตรวจจับระหว่างสแกนในเครื่อง ตรวจสอบ Windows Security > Protection history เพื่อดูสถานะการจัดการภัยคุกคาม"
+          });
+        });
+        if (report.threatDetectionCount > report.threats.length) {
+          findings.push({
+            level: "info",
+            title: "Defender รายงานรายการตรวจจับที่ไม่มีรายละเอียด",
+            detail: "มี " + (report.threatDetectionCount - report.threats.length) + " รายการที่อ่านชื่อหรือระดับความรุนแรงไม่ได้ โปรดตรวจสอบ Windows Security > Protection history"
+          });
+        }
+        failedFiles.forEach((item) => {
+          findings.push({
+            level: "medium",
+            title: "สแกนไฟล์ไม่สำเร็จ: " + item.fileName,
+            detail: item.error || "Microsoft Defender ไม่สามารถสแกนไฟล์นี้ได้"
+          });
+        });
+        if (findings.length === 0 && completed === report.files.length) {
+          findings.push({
+            level: "info",
+            title: "Microsoft Defender ไม่รายงานภัยคุกคามจากไฟล์ที่สแกน",
+            detail: "ตรวจ " + completed + " ไฟล์สำเร็จ ผลนี้ไม่ใช่การรับรองว่าไฟล์ปลอดภัยจากภัยคุกคามทุกชนิด"
+          });
+        } else if (findings.length === 0) {
+          findings.push({
+            level: "info",
+            title: "ไม่มีผลยืนยันว่าไฟล์ทั้งหมดสแกนสำเร็จ",
+            detail: "โปรดตรวจรายการไฟล์และสถานะการสแกนก่อนสรุปผล"
+          });
+        }
+
+        const highCount = report.threats.filter((threat) => threat.severity === "high").length;
+        const mediumCount = report.threats.filter((threat) => threat.severity === "medium").length;
+        const lowCount = report.threats.filter((threat) => threat.severity === "low").length;
+        document.getElementById("localVirusFileCount").textContent = String(report.files.length);
+        document.getElementById("localVirusCompletedCount").textContent = String(completed);
+        document.getElementById("localVirusFailedCount").textContent = String(failedFiles.length);
+        document.getElementById("localVirusThreatCount").textContent = String(report.threatDetectionCount);
+        document.getElementById("localVirusHighCount").textContent = String(highCount);
+        document.getElementById("localVirusMediumCount").textContent = String(mediumCount);
+        document.getElementById("localVirusLowCount").textContent = String(lowCount);
+        summary.hidden = false;
+        renderFindings(output, findings);
+        finishScan(
+          "local-virus-scan",
+          findings,
+          report.files.map((item) => item.fileName).join(", ")
+        );
+      } catch (error) {
+        summary.hidden = true;
+        renderFindings(output, [{
+          level: "info",
+          title: "อ่านรายงาน Microsoft Defender ไม่สำเร็จ",
+          detail: error instanceof SyntaxError
+            ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก virus-scan-report.json จากตัวช่วย"
+            : error.message
+        }]);
+      }
+    });
+
+    function addFinding(container, finding) {
+      const item = document.createElement("article");
+      item.className = "finding " + (finding.level || "info");
+      const heading = document.createElement("h4");
+      heading.textContent = finding.title;
+      const detail = document.createElement("p");
+      detail.textContent = finding.detail;
+      item.append(heading, detail);
+      if (finding.engine) {
+        const engine = document.createElement("span");
+        engine.className = "tag";
+        engine.textContent = "Engine: " + finding.engine;
+        item.append(engine);
+      }
+      if (finding.recommendation) {
+        const recommendation = document.createElement("p");
+        recommendation.className = "recommendation";
+        recommendation.textContent = "แนวทางแก้ไข: " + finding.recommendation;
+        item.append(recommendation);
+      }
+      if (finding.link) {
+        const link = document.createElement("a");
+        link.href = finding.link;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "ดูรายละเอียด";
+        link.style.display = "inline-block";
+        link.style.marginTop = "7px";
+        link.style.fontSize = "11px";
+        item.append(link);
+      }
+      container.append(item);
+    }
+
+    function renderFindings(container, findings, emptyMessage) {
+      container.replaceChildren();
+      if (findings.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = emptyMessage || "ไม่พบรายการจากกฎที่ตรวจในครั้งนี้";
+        container.append(empty);
+        return;
+      }
+      findings.forEach((finding) => addFinding(container, finding));
+    }
+
+    function finishScan(kind, findings, target) {
+      const flagged = findings.filter((item) => item.level === "high" || item.level === "medium" || item.level === "low");
+      state.scans += 1;
+      state.findings += flagged.length;
+      state.high += findings.filter((item) => item.level === "high").length;
+      state.medium += findings.filter((item) => item.level === "medium").length;
+      state.low += findings.filter((item) => item.level === "low").length;
+      state.last = {
+        kind,
+        target,
+        completedAt: new Date().toISOString(),
+        findings: findings.map(({ title, detail, level, link, engine, recommendation }) => ({
+          title,
+          detail,
+          level,
+          link: link || null,
+          engine: engine || null,
+          recommendation: recommendation || null
+        }))
+      };
+      state.history.unshift(state.last);
+      state.history = state.history.slice(0, 25);
+      document.getElementById("statScans").textContent = String(state.scans);
+      document.getElementById("statFindings").textContent = String(state.findings);
+      document.getElementById("statHigh").textContent = String(state.high);
+      document.getElementById("statLast").textContent = new Date(state.last.completedAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+      const maxSeverity = Math.max(state.high, state.medium, state.low, 1);
+      document.getElementById("countHigh").textContent = String(state.high);
+      document.getElementById("countMedium").textContent = String(state.medium);
+      document.getElementById("countLow").textContent = String(state.low);
+      document.getElementById("barHigh").style.width = (state.high / maxSeverity * 100) + "%";
+      document.getElementById("barMedium").style.width = (state.medium / maxSeverity * 100) + "%";
+      document.getElementById("barLow").style.width = (state.low / maxSeverity * 100) + "%";
+      renderFindings(document.getElementById("latestResults"), findings);
+      renderFindings(document.getElementById("reportResults"), findings);
+      renderHistory();
+    }
+
+    function updateServiceStatus(id, ready, label) {
+      const indicator = document.getElementById(id);
+      indicator.textContent = label;
+      indicator.className = "state-label " + (ready ? "ready" : "disabled");
+    }
+
+    async function checkBackendHealth() {
+      try {
+        const response = await fetch("/api/v1/health", { cache: "no-store" });
+        if (!response.ok) throw new Error("Backend ตอบกลับ HTTP " + response.status);
+        const health = await response.json();
+        const services = health.services || {};
+        updateServiceStatus("apiHealth", true, "เชื่อมต่อแล้ว");
+        const queueReady = services.redis === true && services.worker === true;
+        updateServiceStatus("queueHealth", queueReady, queueReady ? "Celery/Redis พร้อม" : "Celery/Redis ไม่พร้อม");
+        updateServiceStatus("dbHealth", services.database === true, services.database ? "PostgreSQL พร้อม" : "Database ไม่พร้อม");
+        updateServiceStatus("virusEngineHealth", services.clamav === true, services.clamav ? "ClamAV พร้อม" : "ClamAV ไม่พร้อม");
+        const ready = health.virus_scan_ready === true;
+        document.getElementById("backendStatusText").textContent = ready ? "Backend พร้อมสแกนไฟล์" : "Backend เชื่อมต่อ · บางบริการยังไม่พร้อม";
+        document.getElementById("backendStatusDot").style.background = ready ? "var(--green)" : "var(--yellow)";
+        document.getElementById("virusWorkerState").textContent = ready ? "พร้อม" : "ไม่พร้อม";
+        document.getElementById("virusWorkerState").style.color = ready ? "var(--green)" : "var(--yellow)";
+      } catch {
+        updateServiceStatus("apiHealth", false, "ยังไม่เชื่อมต่อ");
+        updateServiceStatus("queueHealth", false, "ยังไม่เชื่อมต่อ");
+        updateServiceStatus("dbHealth", false, "ยังไม่เชื่อมต่อ");
+        updateServiceStatus("virusEngineHealth", false, "ยังไม่เชื่อมต่อ");
+        document.getElementById("backendStatusText").textContent = "Backend ยังไม่เชื่อมต่อ";
+        document.getElementById("backendStatusDot").style.background = "var(--yellow)";
+        document.getElementById("virusWorkerState").textContent = "ไม่เชื่อมต่อ";
+      }
+    }
+
+    function renderVirusJobs() {
+      const jobs = Array.from(state.virusJobs.values());
+      const counts = {
+        queued: jobs.filter((job) => job.status === "queued").length,
+        running: jobs.filter((job) => job.status === "running").length,
+        completed: jobs.filter((job) => job.status === "completed" || job.status === "failed").length
+      };
+      document.getElementById("virusQueuedCount").textContent = String(counts.queued);
+      document.getElementById("virusRunningCount").textContent = String(counts.running);
+      document.getElementById("virusCompletedCount").textContent = String(counts.completed);
+
+      for (const containerId of ["dashboardVirusScanJobs", "virusScanJobs", "queueVirusJobs"]) {
+        const container = document.getElementById(containerId);
+        container.replaceChildren();
+        if (jobs.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "ยังไม่มีงานสแกนไฟล์";
+          container.append(empty);
+          continue;
+        }
+        jobs.slice().reverse().forEach((job) => {
+          const card = document.createElement("div");
+          card.className = "scan-job";
+          const info = document.createElement("div");
+          const name = document.createElement("strong");
+          name.textContent = job.filename;
+          const metadata = document.createElement("small");
+          metadata.textContent = job.mode === "deep" ? "สแกนเชิงลึก · ClamAV + YARA" : "สแกนปกติ · ClamAV";
+          info.append(name, metadata);
+          const status = document.createElement("span");
+          status.className = "state-chip";
+          status.textContent = job.status === "completed" ? "เสร็จสิ้น" :
+            job.status === "failed" ? "ผิดพลาด" :
+              job.status === "running" ? "กำลังสแกน" : "รอคิว";
+          const stateLine = document.createElement("div");
+          stateLine.className = "job-state";
+          stateLine.textContent = job.message || ("SHA-256: " + (job.sha256 || "กำลังคำนวณ"));
+          card.append(info, status, stateLine);
+          container.append(card);
+        });
+      }
+    }
+
+    function reportVirusJob(job, scan) {
+      const findings = scan.result && Array.isArray(scan.result.findings)
+        ? scan.result.findings
+        : [{
+            level: "info",
+            title: scan.status === "failed" ? "สแกนไฟล์ไม่สำเร็จ" : "ผลสแกนไม่พร้อมใช้งาน",
+            detail: scan.error_code === "scanner_failed"
+              ? "บริการสแกนขัดข้องหรือไม่สามารถอ่านไฟล์ได้ ตรวจสถานะบริการแล้วลองใหม่ภายหลัง"
+              : "ไม่สามารถอ่านผลการสแกนได้ กรุณาลองใหม่"
+          }];
+      job.status = scan.status;
+      job.sha256 = scan.sha256 || job.sha256;
+      job.message = scan.status === "failed"
+        ? "งานสแกนล้มเหลว · " + (scan.error_code || "unknown_error")
+        : "SHA-256: " + (scan.sha256 || "ไม่ระบุ");
+      if (!job.finalized && (scan.status === "completed" || scan.status === "failed")) {
+        job.finalized = true;
+        for (const resultsId of ["dashboardVirusScanResults", "virusScanResults"]) {
+          renderFindings(document.getElementById(resultsId), findings);
+        }
+        finishScan("virus-file-" + job.mode, findings, job.filename);
+      }
+      renderVirusJobs();
+    }
+
+    function delay(milliseconds) {
+      return new Promise((resolve) => setTimeout(resolve, milliseconds));
+    }
+
+    async function pollVirusJob(job) {
+      let transientErrors = 0;
+      while (!job.finalized && transientErrors < 5) {
+        await delay(1800);
+        try {
+          const response = await fetch("/api/v1/virus-scans/" + encodeURIComponent(job.id), {
+            headers: { "X-Scan-Token": job.token },
+            cache: "no-store"
+          });
+          if (!response.ok) throw new Error("ไม่สามารถอ่านสถานะงานได้ (HTTP " + response.status + ")");
+          const scan = await response.json();
+          transientErrors = 0;
+          reportVirusJob(job, scan);
+        } catch (error) {
+          transientErrors += 1;
+          job.message = "เชื่อมต่อสถานะงานไม่ได้ (" + error.message + ")";
+          renderVirusJobs();
+        }
+      }
+      if (!job.finalized) {
+        job.status = "failed";
+        job.message = "หยุดติดตามชั่วคราว; ตรวจการเชื่อมต่อ Backend แล้วเปิดหน้าผลอีกครั้ง";
+        renderVirusJobs();
+      }
+    }
+
+    function exportReport() {
+      if (!state.last) {
+        alert("ยังไม่มีผลการตรวจสำหรับส่งออก");
+        return;
+      }
+      const report = {
+        product: "วิถีป้องกันรอบด้าน Security Scanner",
+        disclaimer: "ผลคัดกรองเบื้องต้น ไม่ใช่การยืนยันความปลอดภัย",
+        ...state.last
+      };
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "security-scan-report.json";
+      anchor.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderHistory() {
+      const container = document.getElementById("historyTable");
+      container.replaceChildren();
+      if (state.history.length === 0) {
+        container.className = "empty";
+        container.textContent = "ยังไม่มีประวัติการตรวจ";
+        return;
+      }
+      container.className = "table-wrap";
+      const table = document.createElement("table");
+      const head = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      ["ชนิดการตรวจ", "เป้าหมาย", "รายการ", "เวลา", "รายงาน"].forEach((label) => {
+        const cell = document.createElement("th");
+        cell.textContent = label;
+        headerRow.append(cell);
+      });
+      head.append(headerRow);
+      const body = document.createElement("tbody");
+      state.history.forEach((scan, index) => {
+        const row = document.createElement("tr");
+        const flagged = scan.findings.filter((item) => ["high", "medium", "low"].includes(item.level)).length;
+        const values = [
+          scan.kind,
+          scan.target.length > 38 ? scan.target.slice(0, 35) + "..." : scan.target,
+          String(flagged),
+          new Date(scan.completedAt).toLocaleString("th-TH")
+        ];
+        values.forEach((value) => {
+          const cell = document.createElement("td");
+          cell.textContent = value;
+          row.append(cell);
+        });
+        const actionCell = document.createElement("td");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn secondary";
+        button.textContent = "ดูผล";
+        button.addEventListener("click", () => {
+          state.last = scan;
+          renderFindings(document.getElementById("reportResults"), scan.findings);
+        });
+        actionCell.append(button);
+        row.append(actionCell);
+        body.append(row);
+      });
+      table.append(head, body);
+      container.append(table);
+    }
+
+    document.getElementById("exportButton").addEventListener("click", exportReport);
+    document.getElementById("exportHistoryButton").addEventListener("click", exportReport);
+
+    document.getElementById("websiteForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const input = document.getElementById("websiteUrl");
+      const output = document.getElementById("websiteResults");
+      const button = event.currentTarget.querySelector("button[type=submit]");
+      const target = input.value.trim();
+      if (!/^https?:\/\//i.test(target)) {
+        renderFindings(output, [{ level: "info", title: "URL ??????????", detail: "????????? URL ??? HTTP/HTTPS" }]);
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "????????????...";
+      try {
+        const response = await fetch("/api/v1/website-headers", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: target }),
+          cache: "no-store"
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.detail || "Backend ??????? HTTP " + response.status);
+        const findings = Array.isArray(payload.findings) ? payload.findings : [];
+        findings.push({ level: "info", title: "??????????????????", detail: "???? headers ???? HEAD request ??? backend ????????? redirect ?????????????????????????????????????????" });
+        renderFindings(output, findings, "?????????????? headers ??????????");
+        finishScan("website-headers", findings, payload.url || target);
+      } catch (error) {
+        const findings = [{ level: "info", title: "?????????????????????", detail: error.message }];
+        renderFindings(output, findings);
+        finishScan("website-headers", findings, target);
+      } finally {
+        button.disabled = false;
+        button.textContent = "???????????? Passive";
+      }
+    });
+
+    const codeRules = [
+      { pattern: /\beval\s*\(/i, title: "พบการเรียก eval()", level: "high", detail: "การประมวลผลสตริงเป็นโค้ดอาจเปิดช่อง code injection ตรวจสอบแหล่งที่มาของข้อมูลและหลีกเลี่ยง eval หากทำได้" },
+      { pattern: /\.innerHTML\s*=/i, title: "กำหนดค่า innerHTML", level: "medium", detail: "หากข้อมูลมาจากผู้ใช้ อาจเกิด DOM XSS พิจารณาใช้ textContent หรือ sanitize ด้วยไลบรารีที่เหมาะสม" },
+      { pattern: /\bdocument\.write\s*\(/i, title: "พบ document.write()", level: "medium", detail: "การเขียน HTML จากข้อมูลที่ไม่น่าเชื่อถืออาจทำให้เกิด XSS" },
+      { pattern: /\b(?:SELECT|UPDATE|DELETE|INSERT)\b[\s\S]{0,100}(?:\+\s*[A-Za-z_$]|\$\{|\%\s*s)/i, title: "อาจประกอบ SQL ด้วย string", level: "medium", detail: "ตรวจสอบว่าใช้ parameterized query หรือ prepared statement แทนการต่อ string" },
+      { pattern: /\b(?:password|passwd|secret|api[_-]?key)\s*[:=]\s*["'][^"']{4,}["']/i, title: "อาจมี secret ฝังในโค้ด", level: "high", detail: "ย้าย credential ไปเก็บใน secret manager หรือ environment ที่ปลอดภัย และหมุน key หากเป็นข้อมูลจริง" },
+      { pattern: /\bhttp:\/\/(?!localhost\b|127\.0\.0\.1\b)/i, title: "พบ URL แบบ HTTP", level: "low", detail: "ข้อมูลที่ส่งผ่าน HTTP ไม่เข้ารหัส พิจารณาเปลี่ยนเป็น HTTPS" }
+    ];
+
+    document.getElementById("codeFiles").addEventListener("change", (event) => {
+      const files = Array.from(event.target.files);
+      document.getElementById("fileList").textContent = files.map((file) => file.name).join(", ");
+    });
+
+    document.getElementById("codeForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const files = Array.from(document.getElementById("codeFiles").files);
+      const pasted = document.getElementById("codeInput").value;
+      const output = document.getElementById("codeResults");
+      if (files.length > 15) {
+        renderFindings(output, [{ level: "info", title: "มีไฟล์มากเกินไป", detail: "เลือกได้สูงสุด 15 ไฟล์ต่อการตรวจหนึ่งครั้ง" }]);
+        return;
+      }
+      if (files.some((file) => file.size > 1024 * 1024)) {
+        renderFindings(output, [{ level: "info", title: "ไฟล์มีขนาดเกินกำหนด", detail: "แต่ละไฟล์ต้องมีขนาดไม่เกิน 1 MB" }]);
+        return;
+      }
+      if (files.length === 0 && pasted.trim() === "") {
+        renderFindings(output, [{ level: "info", title: "ยังไม่มีโค้ดให้ตรวจ", detail: "เลือกไฟล์หรือวางโค้ดก่อนเริ่มวิเคราะห์" }]);
+        return;
+      }
+      const sources = [];
+      for (const file of files) sources.push({ name: file.name, text: await file.text() });
+      if (pasted.trim()) sources.push({ name: "ข้อความที่วาง", text: pasted });
+
+      const findings = [];
+      for (const source of sources) {
+        for (const rule of codeRules) {
+          const match = rule.pattern.exec(source.text);
+          if (match) {
+            const line = source.text.slice(0, match.index).split(/\r\n|\r|\n/).length;
+            findings.push({
+              level: rule.level,
+              title: rule.title + " — " + source.name + ":" + line,
+              detail: rule.detail
+            });
+          }
+        }
+      }
+      if (findings.length === 0) {
+        findings.push({ level: "info", title: "ไม่พบรูปแบบที่ตรงกับกฎพื้นฐาน", detail: "ตรวจแล้ว " + sources.length + " แหล่งข้อมูล ผลนี้ไม่ใช่การยืนยันว่าโค้ดปลอดภัย" });
+      }
+      renderFindings(output, findings);
+      finishScan("local-code-review", findings, sources.map((source) => source.name).join(", "));
+    });
+
+    function exactVersion(version) {
+      return typeof version === "string" && /^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(version);
+    }
+
+    async function readDependencyFile(file) {
+      let parsed;
+      try {
+        parsed = JSON.parse(await file.text());
+      } catch {
+        throw new Error(file.name + " ไม่ใช่ JSON ที่ถูกต้อง");
+      }
+      const dependencies = [];
+      if (file.name.toLowerCase() === "package-lock.json" || parsed.lockfileVersion) {
+        const packages = parsed.packages;
+        if (!packages || typeof packages !== "object") {
+          throw new Error("ไม่พบ packages ใน package-lock.json กรุณาใช้ package-lock.json รุ่น 2 หรือ 3");
+        }
+        for (const [path, data] of Object.entries(packages)) {
+          if (!path.includes("node_modules/") || !data || typeof data.version !== "string") continue;
+          const name = data.name || path.slice(path.lastIndexOf("node_modules/") + "node_modules/".length);
+          dependencies.push({ name, version: data.version });
+        }
+      } else {
+        for (const group of ["dependencies", "devDependencies", "optionalDependencies"]) {
+          const entries = parsed[group];
+          if (!entries || typeof entries !== "object") continue;
+          for (const [name, version] of Object.entries(entries)) {
+            if (typeof version === "string") dependencies.push({ name, version: version.trim() });
+          }
+        }
+      }
+      return dependencies;
+    }
+
+    document.getElementById("dependencyForm").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const files = Array.from(document.getElementById("dependencyFiles").files);
+      const output = document.getElementById("dependencyResults");
+      const button = event.currentTarget.querySelector("button[type=submit]");
+      if (files.length === 0) {
+        renderFindings(output, [{ level: "info", title: "ไม่ได้เลือกไฟล์", detail: "เลือก package.json หรือ package-lock.json ก่อนเริ่มตรวจ" }]);
+        return;
+      }
+      if (files.some((file) => file.size > 2 * 1024 * 1024)) {
+        renderFindings(output, [{ level: "info", title: "ไฟล์มีขนาดเกินกำหนด", detail: "แต่ละไฟล์ต้องมีขนาดไม่เกิน 2 MB" }]);
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "กำลังค้นหาใน OSV...";
+      try {
+        const parsed = [];
+        for (const file of files) parsed.push(...await readDependencyFile(file));
+        const unique = new Map();
+        for (const dependency of parsed) unique.set(dependency.name + "@" + dependency.version, dependency);
+        const allDependencies = Array.from(unique.values());
+        const exact = allDependencies.filter((dependency) => exactVersion(dependency.version));
+        const skipped = allDependencies.length - exact.length;
+        if (exact.length === 0) {
+          throw new Error("ไม่พบเวอร์ชันแบบเจาะจงสำหรับตรวจ แนะนำให้อัปโหลด package-lock.json");
+        }
+        const findings = [];
+        for (let offset = 0; offset < exact.length; offset += 1000) {
+          const batch = exact.slice(offset, offset + 1000);
+          const response = await fetch("https://api.osv.dev/v1/querybatch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              queries: batch.map((dependency) => ({
+                package: { name: dependency.name, ecosystem: "npm" },
+                version: dependency.version.replace(/^v/, "")
+              }))
+            })
+          });
+          if (!response.ok) throw new Error("OSV API ตอบกลับ HTTP " + response.status);
+          const data = await response.json();
+          if (!Array.isArray(data.results) || data.results.length !== batch.length) {
+            throw new Error("รูปแบบผลลัพธ์จาก OSV API ไม่ถูกต้อง");
+          }
+          data.results.forEach((result, index) => {
+            for (const vulnerability of result.vulns || []) {
+              const severity = (vulnerability.database_specific && vulnerability.database_specific.severity || "").toUpperCase();
+              const level = severity === "CRITICAL" || severity === "HIGH" ? "high" : severity === "LOW" ? "low" : "medium";
+              findings.push({
+                level,
+                title: (vulnerability.id || "ช่องโหว่ที่ไม่ระบุ ID") + " — " + batch[index].name + "@" + batch[index].version,
+                detail: vulnerability.summary || "พบรายการช่องโหว่ใน OSV กรุณาตรวจสอบช่วงเวอร์ชันที่ได้รับผลกระทบและเวอร์ชันที่แก้ไขแล้ว",
+                link: vulnerability.id ? "https://osv.dev/vulnerability/" + encodeURIComponent(vulnerability.id) : null
+              });
+            }
+          });
+        }
+        if (skipped > 0) {
+          findings.push({ level: "medium", title: "ข้าม " + skipped + " dependency ที่ระบุเวอร์ชันเป็นช่วง", detail: "ต้องใช้ package-lock.json เพื่อระบุเวอร์ชันที่ติดตั้งจริงก่อนตรวจ CVE" });
+        }
+        if (findings.length === 0) {
+          findings.push({ level: "info", title: "ไม่พบรายการช่องโหว่ในผล OSV", detail: "ตรวจสอบ " + exact.length + " dependency ที่ระบุเวอร์ชันได้แล้ว ฐานข้อมูลอาจไม่ครอบคลุมช่องโหว่ทุกประเภท" });
+        }
+        renderFindings(output, findings);
+        finishScan("npm-dependency-audit", findings, files.map((file) => file.name).join(", "));
+      } catch (error) {
+        const findings = [{ level: "info", title: "ตรวจ dependency ไม่สำเร็จ", detail: error.message }];
+        renderFindings(output, findings);
+        finishScan("npm-dependency-audit", findings, files.map((file) => file.name).join(", "));
+      } finally {
+        button.disabled = false;
+        button.textContent = "ตรวจสอบกับ OSV";
+      }
+    });
+
+    document.querySelectorAll(".virus-scan-form").forEach((scanForm) => {
+      scanForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const files = Array.from(form.querySelector('input[type="file"]').files);
+        const output = document.getElementById(form.dataset.results);
+        const button = form.querySelector("button[type=submit]");
+        const mode = form.querySelector('input[type="radio"]:checked').value;
+        if (files.length === 0 || files.length > 10) {
+          renderFindings(output, [{
+            level: "info",
+            title: "จำนวนไฟล์ไม่ถูกต้อง",
+            detail: "เลือกไฟล์อย่างน้อย 1 ไฟล์และไม่เกิน 10 ไฟล์ต่อครั้ง"
+          }]);
+          return;
+        }
+        const tooLarge = files.find((file) => file.size > 20 * 1024 * 1024);
+        if (tooLarge) {
+          renderFindings(output, [{
+            level: "info",
+            title: "ไฟล์มีขนาดเกินกำหนด",
+            detail: tooLarge.name + " มีขนาดเกิน 20 MiB"
+          }]);
+          return;
+        }
+
+        button.disabled = true;
+        button.textContent = "กำลังส่งไฟล์เข้าคิว...";
+        renderFindings(output, [{
+          level: "info",
+          title: "กำลังส่งไฟล์เข้าสู่ระบบสแกน",
+          detail: "ไฟล์จะถูกอัปโหลดไปยัง Backend ที่ให้บริการหน้านี้ และไม่ถูกรัน"
+        }]);
+        try {
+          for (const file of files) {
+            const uploadForm = new FormData();
+            uploadForm.append("file", file, file.name);
+            uploadForm.append("mode", mode);
+            uploadForm.append("consent", "true");
+            const response = await fetch("/api/v1/virus-scans", {
+              method: "POST",
+              body: uploadForm,
+              cache: "no-store"
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              const detail = payload.detail || "Backend ตอบกลับ HTTP " + response.status;
+              throw new Error(file.name + ": " + detail);
+            }
+            const job = {
+              ...payload.scan,
+              token: payload.access_token,
+              finalized: false,
+              message: "ส่งเข้าคิวแล้ว"
+            };
+            state.virusJobs.set(job.id, job);
+            renderVirusJobs();
+            void pollVirusJob(job);
+          }
+        } catch (error) {
+          renderFindings(output, [{
+            level: "info",
+            title: "ส่งไฟล์เข้าคิวไม่สำเร็จ",
+            detail: error.message + " ตรวจสอบสถานะ Backend/Redis แล้วลองส่งไฟล์ที่ยังไม่สำเร็จใหม่"
+          }]);
+        } finally {
+          button.disabled = false;
+          button.textContent = "ส่งไฟล์เข้าคิวสแกน";
+        }
+      });
+    });
+
+    checkBackendHealth();
+    window.setInterval(checkBackendHealth, 15000);
+  </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAjyXKgx8Ox-s9tBsP2w2psXWM0EVUJCOk",
+      authDomain: "deea-9ed32.firebaseapp.com",
+      projectId: "deea-9ed32",
+      storageBucket: "deea-9ed32.firebasestorage.app",
+      messagingSenderId: "649361533233",
+      appId: "1:649361533233:web:a2f979984a76f67f222810",
+      measurementId: "G-5V2FS5TZDY"
+    };
+
+    try {
+      const app = initializeApp(firebaseConfig);
+      if (await isSupported()) {
+        getAnalytics(app);
+      } else {
+        console.warn("Firebase Analytics is not supported in this browser.");
+      }
+    } catch (error) {
+      console.error("Firebase Analytics could not be initialized.", error);
+    }
+  </script>
+</body>
+</html>

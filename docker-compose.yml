@@ -1,0 +1,117 @@
+name: security-scanner
+
+services:
+  api:
+    build: .
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://scanner:${POSTGRES_PASSWORD:-local-development-only}@db:5432/scanner
+      REDIS_URL: redis://redis:6379/0
+      CLAMD_HOST: clamav
+      CLAMD_PORT: "3310"
+      QUARANTINE_DIR: /data/quarantine
+      MAX_UPLOAD_BYTES: "20971520"
+      YARA_RULES_PATH: /app/rules/basic_indicators.yar
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:8000:8000"
+    volumes:
+      - quarantine:/data/quarantine
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_started
+    networks:
+      - scan_internal
+      - api_access
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1.0
+
+  worker:
+    build: .
+    command:
+      - celery
+      - -A
+      - app.worker.celery_app:celery_app
+      - worker
+      - --loglevel=INFO
+      - --concurrency=2
+      - --max-tasks-per-child=20
+    environment:
+      DATABASE_URL: postgresql+psycopg://scanner:${POSTGRES_PASSWORD:-local-development-only}@db:5432/scanner
+      REDIS_URL: redis://redis:6379/0
+      CLAMD_HOST: clamav
+      CLAMD_PORT: "3310"
+      QUARANTINE_DIR: /data/quarantine
+      MAX_UPLOAD_BYTES: "20971520"
+      YARA_RULES_PATH: /app/rules/basic_indicators.yar
+    volumes:
+      - quarantine:/data/quarantine
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clamav:
+        condition: service_started
+    networks:
+      - scan_internal
+    restart: unless-stopped
+    mem_limit: 1g
+    cpus: 1.0
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: scanner
+      POSTGRES_USER: scanner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-development-only}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scanner -d scanner"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - scan_internal
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - scan_internal
+    restart: unless-stopped
+
+  clamav:
+    image: clamav/clamav:1.4
+    volumes:
+      - clamav_data:/var/lib/clamav
+    expose:
+      - "3310"
+    networks:
+      - scan_internal
+      - signature_updates
+    restart: unless-stopped
+    mem_limit: 2g
+
+volumes:
+  postgres_data:
+  clamav_data:
+  quarantine:
+
+networks:
+  scan_internal:
+    internal: true
+  api_access:
+    driver: bridge
+  signature_updates:
