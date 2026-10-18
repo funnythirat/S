@@ -194,7 +194,7 @@ class VirusScanApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("attachment; filename=\"wifi-scan.ps1\"", response.headers["content-disposition"])
-        self.assertIn("netsh wlan show interfaces", response.text)
+        self.assertIn("netsh wlan show networks mode=bssid", response.text)
 
     def test_local_virus_helper_is_downloadable(self):
         response = self.client.get("/virus-scan.ps1")
