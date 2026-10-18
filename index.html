@@ -493,25 +493,30 @@
       </section>
       <section class="view" id="view-wifi">
         <div class="card">
-          <h2>ตรวจสอบ Wi-Fi ที่เชื่อมต่ออยู่</h2>
-          <p class="sub">ตัวช่วย Windows อ่านชื่อเครือข่ายที่เชื่อมต่อ, คุณภาพสัญญาณ และชนิดการยืนยันตัวตน/การเข้ารหัสจาก Native Wi-Fi API แล้วบันทึกรายงานไว้ในเครื่อง</p>
-          <div class="callout info">เว็บไม่สามารถอ่านข้อมูล Wi-Fi จากเบราว์เซอร์ได้โดยตรง จึงต้องดาวน์โหลดและเรียกใช้ตัวช่วย Windows ด้วยตนเอง การตรวจนี้อ่านเฉพาะเครือข่ายที่เชื่อมต่ออยู่ ไม่สแกนเครือข่ายรอบข้าง และไม่ส่งรายงานไปยังเซิร์ฟเวอร์</div>
+          <h2>ตรวจสอบ Wi-Fi รอบตัว</h2>
+          <p class="sub">สแกนรายชื่อเครือข่าย Wi-Fi ที่อุปกรณ์ Windows มองเห็น พร้อมระดับสัญญาณ วิธีตรวจสอบตัวตน และการเข้ารหัส ก่อนที่คุณจะเลือกเชื่อมต่อ</p>
+          <div class="callout info">เบราว์เซอร์อ่านสัญญาณ Wi-Fi โดยตรงไม่ได้ ให้เรียกตัวช่วย Windows ด้านล่างเพื่อสำรวจเครือข่ายใกล้เคียง ตัวช่วยจะไม่เชื่อมต่อกับเครือข่ายใด ไม่อ่านรหัสผ่าน และไม่ส่งรายงานขึ้นเซิร์ฟเวอร์</div>
           <ol class="sub">
             <li><a href="./wifi-scan.ps1">ดาวน์โหลดตัวช่วยตรวจ Wi-Fi สำหรับ Windows</a></li>
-            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง (เป็นการอนุญาตเฉพาะการเรียกครั้งนี้) ระบบจะสร้าง <code>wifi-scan.json</code> บน Desktop</li>
-            <li>เลือกไฟล์รายงานด้านล่างเพื่อแสดงระดับสัญญาณและประเมินความเสี่ยง</li>
+            <li>เปิด PowerShell ในโฟลเดอร์ที่ดาวน์โหลด แล้วเรียกคำสั่งด้านล่าง ระบบจะสร้างรายชื่อเครือข่ายและคุณภาพสัญญาณไว้ใน <code>wifi-scan.json</code> บน Desktop</li>
+            <li>เลือกไฟล์รายงานด้านล่าง แล้วกด “รายละเอียด” ข้างเครือข่ายเพื่อดูความเสี่ยง</li>
           </ol>
           <code class="command">powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\wifi-scan.ps1"</code>
           <div class="callout">ผลประเมินดูเฉพาะการตั้งค่าการยืนยันตัวตน/การเข้ารหัสที่ Windows รายงาน ไม่ใช่การยืนยันว่าเครือข่ายปลอดภัยทั้งหมด ความแข็งแรงรหัสผ่าน, WPS, firmware, การตั้งค่า router และอุปกรณ์อื่นในเครือข่ายตรวจไม่ได้จากเครื่องลูกข่าย</div>
           <form id="wifiScanForm" class="form-grid">
-            <label for="wifiReportFile">รายงานจากตัวช่วย Windows
+            <label for="wifiReportFile">รายงานเครือข่ายรอบตัวจากตัวช่วย Windows
               <input type="file" id="wifiReportFile" accept=".json,application/json" required>
             </label>
-            <button class="btn" type="submit">วิเคราะห์รายงาน Wi-Fi</button>
+            <button class="btn" type="submit">แสดงเครือข่ายและตรวจความเสี่ยง</button>
           </form>
         </div>
         <div class="card" style="margin-top:14px">
-          <h2>ผลการตรวจ</h2>
+          <h2>เครือข่ายที่พบ</h2>
+          <p class="sub">ความแรงสัญญาณไม่ใช่คะแนนความปลอดภัย ระดับความเสี่ยงเป็นการคัดกรองจากชนิดการยืนยันตัวตนและการเข้ารหัสที่ระบบรายงาน</p>
+          <div id="wifiNetworks" class="table-wrap" hidden aria-live="polite"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h2>รายละเอียดเครือข่ายที่เลือก</h2>
           <p class="sub">จำนวนความเสี่ยงคือจำนวนประเด็นที่ตรงกับกฎตรวจ ไม่ใช่เปอร์เซ็นต์โอกาสถูกโจมตี</p>
           <div id="wifiSummary" class="wifi-summary" hidden>
             <div class="wifi-metric"><span>สถานะความปลอดภัย</span><strong id="wifiSecurityStatus"></strong></div>
@@ -573,168 +578,108 @@
     navButtons.forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
     document.querySelectorAll("[data-go]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.go)));
 
+    function assessWifiNetwork(network) {
+      const authentication = network.authentication.toUpperCase();
+      const cipher = network.cipher.toUpperCase();
+      const findings = [];
+      const isOpen = !network.securityEnabled || /OPEN|NONE/.test(authentication) || cipher === "NONE";
+      const isLegacy = /WEP|SHARED|WPA-NONE/.test(authentication) || /WEP/.test(cipher);
+      const isOldWpa = /^WPA(?:-PERSONAL|-PSK)?$/.test(authentication);
+      const isTkip = cipher === "TKIP";
+      const unknown = /UNKNOWN|NOT SUPPORTED/.test(authentication + " " + cipher);
+      if (isOpen) {
+        findings.push({ level: "high", title: "เครือข่ายเปิดหรือไม่มีการเข้ารหัส", detail: "ผู้ที่อยู่ในระยะสัญญาณอาจดักอ่านหรือปลอมแปลงการเชื่อมต่อได้ หลีกเลี่ยงการส่งข้อมูลสำคัญ และเลือกเครือข่าย WPA2-AES หรือ WPA3" });
+      } else if (isLegacy) {
+        findings.push({ level: "high", title: "พบการยืนยันตัวตน/การเข้ารหัสล้าสมัย", detail: "WEP, Shared Key หรือ WPA-NONE ไม่ปลอดภัยเพียงพอ ควรหลีกเลี่ยงหรือให้เจ้าของเราเตอร์เปลี่ยนเป็น WPA2-AES หรือ WPA3" });
+      } else {
+        if (isOldWpa) findings.push({ level: "medium", title: "ใช้ WPA รุ่นเก่า", detail: "ควรเปลี่ยนเป็น WPA2-AES หรือ WPA3" });
+        if (isTkip) findings.push({ level: "medium", title: "ใช้การเข้ารหัส TKIP", detail: "TKIP เลิกแนะนำแล้ว ควรใช้ AES/CCMP หรือ GCMP" });
+        const modernProtected = /WPA2|WPA3/.test(authentication) && /CCMP|AES|GCMP/.test(cipher);
+        if (!unknown && !modernProtected && findings.length === 0) findings.push({ level: "medium", title: "ควรตรวจสอบชนิดการป้องกันเพิ่มเติม", detail: "ไม่พบรูปแบบ WPA2/WPA3 ร่วมกับ AES/CCMP ที่คาดหวัง อย่าใช้เครือข่ายนี้ส่งข้อมูลสำคัญจนกว่าจะยืนยันการตั้งค่า" });
+      }
+      if (unknown) findings.push({ level: "info", title: "ข้อมูลความปลอดภัยไม่เพียงพอ", detail: "Windows รายงานชนิดการยืนยันตัวตนหรือการเข้ารหัสที่เครื่องมือนี้ไม่รู้จัก จึงไม่สรุปว่าเครือข่ายปลอดภัย" });
+      if (!findings.length) findings.push({ level: "info", title: "ไม่พบสัญญาณการตั้งค่าล้าสมัย", detail: "พบการป้องกันที่รู้จัก เช่น WPA2/WPA3 กับ AES/CCMP แต่ไม่ใช่การรับรองความปลอดภัยทั้งหมดของเครือข่าย" });
+      const status = findings.some(item => item.level === "high") ? "ความเสี่ยงสูง" : findings.some(item => item.level === "medium") ? "ความเสี่ยงปานกลาง" : unknown ? "ข้อมูลไม่พอ" : "ไม่พบปัญหาชัดเจน";
+      return { findings, status, high: findings.filter(item => item.level === "high").length, medium: findings.filter(item => item.level === "medium").length, low: findings.filter(item => item.level === "low").length };
+    }
+
+    function showWifiNetwork(network, capturedAtUtc) {
+      const result = assessWifiNetwork(network);
+      const signal = network.signalQualityPercent;
+      let signalLabel = "สัญญาณอ่อน";
+      let signalClass = "low";
+      if (signal >= 80) { signalLabel = "สัญญาณดีมาก"; signalClass = ""; }
+      else if (signal >= 60) { signalLabel = "สัญญาณดี"; signalClass = ""; }
+      else if (signal >= 40) { signalLabel = "สัญญาณปานกลาง"; signalClass = "medium"; }
+      const report = { kind: "wifi-network", ssid: network.ssid, authentication: network.authentication, cipher: network.cipher, signalQualityPercent: signal, securityEnabled: network.securityEnabled, capturedAtUtc, findings: result.findings };
+      document.getElementById("wifiSecurityStatus").textContent = result.status;
+      document.getElementById("wifiSsid").textContent = network.ssid || "(เครือข่ายไม่ประกาศชื่อ)";
+      document.getElementById("wifiSignalText").textContent = signalLabel + " · " + signal + "%";
+      const signalBar = document.getElementById("wifiSignalBar");
+      signalBar.style.width = signal + "%";
+      signalBar.className = "wifi-signal-fill " + signalClass;
+      document.getElementById("wifiHighCount").textContent = String(result.high);
+      document.getElementById("wifiMediumCount").textContent = String(result.medium);
+      document.getElementById("wifiLowCount").textContent = String(result.low);
+      document.getElementById("wifiAuthentication").textContent = network.authentication;
+      document.getElementById("wifiCipher").textContent = network.cipher;
+      document.getElementById("wifiCapturedAt").textContent = new Date(capturedAtUtc).toLocaleString("th-TH");
+      document.getElementById("wifiSummary").hidden = false;
+      renderFindings(document.getElementById("wifiResults"), result.findings);
+      finishScan("wifi-network", result.findings, network.ssid || "เครือข่ายไม่ประกาศชื่อ");
+    }
+
     document.getElementById("wifiScanForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const output = document.getElementById("wifiResults");
       const summary = document.getElementById("wifiSummary");
+      const networkList = document.getElementById("wifiNetworks");
       const file = document.getElementById("wifiReportFile").files[0];
       if (!file) return;
-
       try {
-        if (file.size > 64 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด");
+        if (file.size > 256 * 1024) throw new Error("ไฟล์รายงานมีขนาดเกินกำหนด (สูงสุด 256 KiB)");
         const report = JSON.parse(await file.text());
-        if (!report || typeof report !== "object" || Array.isArray(report)) {
-          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
+        if (!report || typeof report !== "object" || Array.isArray(report) || ![1, 2].includes(report.schemaVersion) || typeof report.capturedAtUtc !== "string" || Number.isNaN(Date.parse(report.capturedAtUtc))) throw new Error("รูปแบบรายงาน Wi-Fi ไม่ถูกต้อง");
+        const networks = report.schemaVersion === 1 ? [report] : report.networks;
+        if (!Array.isArray(networks) || networks.length > 1000) throw new Error("รายงานไม่มีรายการเครือข่ายที่รองรับ");
+        const valid = networks.every(network => network && typeof network.ssid === "string" && typeof network.authentication === "string" && typeof network.cipher === "string" && typeof network.securityEnabled === "boolean" && Number.isInteger(network.signalQualityPercent) && network.signalQualityPercent >= 0 && network.signalQualityPercent <= 100 && (network.bssidCount === undefined || Number.isInteger(network.bssidCount) && network.bssidCount >= 0));
+        if (!valid) throw new Error("ข้อมูลเครือข่ายหรือระดับสัญญาณในรายงานไม่ถูกต้อง");
+        networkList.replaceChildren();
+        if (!networks.length) {
+          networkList.hidden = false;
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "ไม่พบเครือข่าย Wi-Fi รอบตัว ตรวจว่า Wi-Fi เปิดอยู่แล้วเรียกตัวช่วย Windows ใหม่";
+          networkList.append(empty);
+          summary.hidden = true;
+          renderFindings(output, [{ level: "info", title: "ไม่พบเครือข่าย Wi-Fi", detail: "ผลสแกนครั้งนี้ไม่มีเครือข่ายที่ Windows รายงาน" }]);
+          return;
         }
-        const signal = report.signalQualityPercent;
-        if (
-          report.schemaVersion !== 1 ||
-          typeof report.ssid !== "string" ||
-          !report.ssid.trim() ||
-          typeof report.authentication !== "string" ||
-          typeof report.cipher !== "string" ||
-          typeof report.securityEnabled !== "boolean" ||
-          !Number.isInteger(signal) ||
-          signal < 0 ||
-          signal > 100 ||
-          typeof report.capturedAtUtc !== "string" ||
-          Number.isNaN(Date.parse(report.capturedAtUtc))
-        ) {
-          throw new Error("รูปแบบรายงานไม่ถูกต้องหรือไม่ใช่รายงานจากตัวช่วย Wi-Fi รุ่นที่รองรับ");
-        }
-
-        const authentication = report.authentication.toUpperCase();
-        const cipher = report.cipher.toUpperCase();
-        const findings = [];
-        const isOpen = !report.securityEnabled || authentication === "OPEN" || cipher === "NONE";
-        const isLegacy = authentication === "SHARED" ||
-          authentication === "WPA-NONE" ||
-          cipher.startsWith("WEP");
-        if (isOpen) {
-          findings.push({
-            level: "high",
-            title: "เครือข่ายเปิดหรือไม่เข้ารหัส",
-            detail: "ข้อมูลระบุว่าไม่มีการป้องกันระดับ Wi-Fi เพียงพอ ผู้อื่นในระยะสัญญาณอาจดักอ่านหรือปลอมแปลงการเชื่อมต่อได้ ควรตั้งค่า WPA2-AES หรือ WPA3 ที่เราเตอร์"
-          });
-        } else if (isLegacy) {
-          findings.push({
-            level: "high",
-            title: "พบการยืนยันตัวตน/การเข้ารหัสแบบเก่า",
-            detail: "Shared Key, WPA-NONE หรือ WEP มีความปลอดภัยไม่เพียงพอ ควรเปลี่ยนเป็น WPA2-AES หรือ WPA3"
-          });
-        }
-
-        if (!isOpen && !isLegacy) {
-          if (authentication === "WPA" || authentication === "WPA-PSK") {
-            findings.push({
-              level: "medium",
-              title: "ใช้ WPA รุ่นเก่า",
-              detail: "WPA เดิมมีข้อจำกัดด้านความปลอดภัย ควรเปลี่ยนการตั้งค่าเราเตอร์เป็น WPA2-AES หรือ WPA3"
-            });
-          }
-          if (cipher === "TKIP") {
-            findings.push({
-              level: "medium",
-              title: "พบการเข้ารหัส TKIP",
-              detail: "TKIP เป็นวิธีเข้ารหัสรุ่นเก่าที่ไม่แนะนำ ควรใช้ AES/CCMP หรือ GCMP"
-            });
-          }
-        }
-
-        const recognizedAuthentication = [
-          "OPEN",
-          "SHARED",
-          "WPA",
-          "WPA-PSK",
-          "WPA-NONE",
-          "WPA2",
-          "WPA2-PSK",
-          "WPA3",
-          "WPA3-SAE",
-          "WPA3-ENT",
-          "WPA3-ENT-192"
-        ].includes(authentication);
-        const recognizedCipher = [
-          "NONE",
-          "WEP40",
-          "WEP104",
-          "TKIP",
-          "AES-CCMP",
-          "GCMP",
-          "GCMP-256",
-          "CCMP-256",
-          "BIP",
-          "BIP-GMAC-128",
-          "BIP-GMAC-256",
-          "BIP-CMAC-256"
-        ].includes(cipher);
-        const unknownSecurity = authentication.startsWith("UNKNOWN") ||
-          cipher.startsWith("UNKNOWN") ||
-          !recognizedAuthentication ||
-          !recognizedCipher;
-        if (unknownSecurity) {
-          findings.push({
-            level: "info",
-            title: "ข้อมูลความปลอดภัยบางส่วนยังประเมินไม่ได้",
-            detail: "Windows รายงานชนิดการยืนยันตัวตนหรือการเข้ารหัสที่เครื่องมือนี้ไม่รู้จัก จึงไม่สรุปว่าเครือข่ายปลอดภัย"
-          });
-        } else if (!isOpen && !isLegacy && findings.length === 0) {
-          findings.push({
-            level: "info",
-            title: "ไม่พบสัญญาณการตั้งค่าล้าสมัยจากข้อมูลที่อ่านได้",
-            detail: "พบการยืนยันตัวตนและการเข้ารหัสที่รองรับ ไม่ใช่การรับรองความปลอดภัยทั้งหมดของเครือข่าย"
-          });
-        }
-
-        let signalLabel = "สัญญาณอ่อน";
-        let signalClass = "low";
-        if (signal >= 80) {
-          signalLabel = "สัญญาณดีมาก";
-          signalClass = "";
-        } else if (signal >= 60) {
-          signalLabel = "สัญญาณดี";
-          signalClass = "";
-        } else if (signal >= 40) {
-          signalLabel = "สัญญาณปานกลาง";
-          signalClass = "medium";
-        }
-        findings.push({
-          level: "info",
-          title: signalLabel + " (" + signal + "%)",
-          detail: "เปอร์เซ็นต์นี้เป็นคุณภาพสัญญาณที่ Windows รายงาน ไม่ใช่ความเสี่ยงด้านความปลอดภัย สัญญาณอ่อนอาจทำให้การเชื่อมต่อไม่เสถียร"
+        const table = document.createElement("table");
+        const head = document.createElement("thead");
+        const header = document.createElement("tr");
+        ["เครือข่าย", "สัญญาณ", "การป้องกัน", "ประเมิน", "รายละเอียด"].forEach(label => { const cell = document.createElement("th"); cell.textContent = label; header.append(cell); });
+        head.append(header);
+        const body = document.createElement("tbody");
+        networks.forEach((network, index) => {
+          const risk = assessWifiNetwork(network);
+          const row = document.createElement("tr");
+          const values = [network.ssid || "(ไม่ประกาศชื่อ)", network.signalQualityPercent + "%", network.authentication + " / " + network.cipher, risk.status];
+          values.forEach(value => { const cell = document.createElement("td"); cell.textContent = value; row.append(cell); });
+          const actionCell = document.createElement("td");
+          const button = document.createElement("button");
+          button.type = "button"; button.className = "btn secondary"; button.textContent = "รายละเอียด";
+          button.addEventListener("click", () => showWifiNetwork(network, report.capturedAtUtc));
+          actionCell.append(button); row.append(actionCell); body.append(row);
         });
-
-        const highCount = findings.filter((finding) => finding.level === "high").length;
-        const mediumCount = findings.filter((finding) => finding.level === "medium").length;
-        const lowCount = findings.filter((finding) => finding.level === "low").length;
-        let securityStatus = "ไม่พบปัญหาจากค่าที่อ่านได้";
-        if (highCount > 0) securityStatus = "ความเสี่ยงสูง";
-        else if (mediumCount > 0) securityStatus = "ความเสี่ยงปานกลาง";
-        else if (unknownSecurity) securityStatus = "ข้อมูลไม่พอสรุป";
-
-        document.getElementById("wifiSecurityStatus").textContent = securityStatus;
-        document.getElementById("wifiSsid").textContent = report.ssid;
-        document.getElementById("wifiSignalText").textContent = signalLabel + " · " + signal + "%";
-        const signalBar = document.getElementById("wifiSignalBar");
-        signalBar.style.width = signal + "%";
-        signalBar.className = "wifi-signal-fill " + signalClass;
-        document.getElementById("wifiHighCount").textContent = String(highCount);
-        document.getElementById("wifiMediumCount").textContent = String(mediumCount);
-        document.getElementById("wifiLowCount").textContent = String(lowCount);
-        document.getElementById("wifiAuthentication").textContent = report.authentication;
-        document.getElementById("wifiCipher").textContent = report.cipher;
-        document.getElementById("wifiCapturedAt").textContent = new Date(report.capturedAtUtc).toLocaleString("th-TH");
-        summary.hidden = false;
-        renderFindings(output, findings);
+        table.append(head, body);
+        networkList.replaceChildren(table);
+        networkList.hidden = false;
+        showWifiNetwork(networks[0], report.capturedAtUtc);
       } catch (error) {
         summary.hidden = true;
-        renderFindings(output, [{
-          level: "info",
-          title: "อ่านรายงาน Wi-Fi ไม่สำเร็จ",
-          detail: error instanceof SyntaxError
-            ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก wifi-scan.json ที่สร้างจากตัวช่วย"
-            : error.message
-        }]);
+        networkList.hidden = true;
+        renderFindings(output, [{ level: "info", title: "อ่านรายงาน Wi-Fi ไม่สำเร็จ", detail: error instanceof SyntaxError ? "ไฟล์ไม่ใช่ JSON ที่ถูกต้อง กรุณาเลือก wifi-scan.json จากตัวช่วย Windows" : error.message }]);
       }
     });
 
